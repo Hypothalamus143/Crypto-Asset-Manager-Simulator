@@ -162,10 +162,9 @@ Used for creating cryptocurrency objects (`Bitcoin`, `Ethereum`, `Solana`) witho
 
 # **📅 Submission Details**
 
-* GitHub repository shared with the instructor
+* GitHub repository public
 * Class diagram included (PDF)
-* README contains documentation required by the capstone specification
-* Repository will be continuously updated until the final presentation
+* README
 
 ---
 
