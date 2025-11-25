@@ -97,6 +97,11 @@ public class AuthManager {
     }
 
     public static void logout() {
+        if (currentUser != null) {
+            // Save user data (balance) before logging out
+            UserRepository.saveUserData(currentUser);
+            System.out.println("Balance saved successfully.");
+        }
         currentUser = null;
     }
 

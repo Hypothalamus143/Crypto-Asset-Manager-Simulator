@@ -1,5 +1,6 @@
+import java.util.Map;
 import java.util.Scanner;
-
+import java.util.List;
 public class CryptoManager {
     private User currentUser;
     private Scanner scanner;
@@ -98,10 +99,33 @@ public class CryptoManager {
 
     private void checkMarket() {
         System.out.println("\n--- Market Prices ---");
-        System.out.println("Current Market Prices (Mock Data):");
-        System.out.println("- Bitcoin (BTC): $45,230.50");
-        System.out.println("- Ethereum (ETH): $3,215.75");
-        System.out.println("- Solana (SOL): $102.30");
+
+        // Update all asset prices using static method
+        MarketManager.updateMarketPrices();
+
+        // Display current prices
+        Map<String, Double> marketPrices = MarketManager.getAllPrices();
+        System.out.println("Current Market Prices:");
+        System.out.println("======================");
+
+        for (Map.Entry<String, Double> entry : marketPrices.entrySet()) {
+            String symbol = entry.getKey();
+            double price = entry.getValue();
+            String assetName = getAssetName(symbol);
+            System.out.printf("- %s (%s): $%,.2f\n", assetName, symbol, price);
+        }
+
+        System.out.println("\nMarket prices have been updated!");
+        System.out.println("These new prices will be used for any new purchases.");
+    }
+
+    private String getAssetName(String symbol) {
+        switch (symbol) {
+            case "BTC": return "Bitcoin";
+            case "ETH": return "Ethereum";
+            case "SOL": return "Solana";
+            default: return "Unknown";
+        }
     }
 
     private void deposit() {
@@ -111,17 +135,28 @@ public class CryptoManager {
 
         try {
             double amount = Double.parseDouble(amountInput);
+
             if (amount <= 0) {
-                System.out.println("Deposit amount must be positive.");
+                System.out.println("Error: Deposit amount must be positive.");
                 return;
             }
 
-            double newBalance = currentUser.getBalance() + amount;
+            if (amount > 1000000) { // Reasonable limit
+                System.out.println("Error: Deposit amount cannot exceed $1,000,000.");
+                return;
+            }
+
+            double oldBalance = currentUser.getBalance();
+            double newBalance = oldBalance + amount;
             currentUser.setBalance(newBalance);
+
             System.out.printf("Successfully deposited $%.2f\n", amount);
-            System.out.printf("New balance: $%.2f\n", currentUser.getBalance());
+            System.out.printf("Old balance: $%.2f\n", oldBalance);
+            System.out.printf("New balance: $%.2f\n", newBalance);
+            System.out.println("Note: Balance will be saved when you logout.");
+
         } catch (NumberFormatException e) {
-            System.out.println("Invalid amount format. Please enter a valid number.");
+            System.out.println("Error: Invalid amount. Please enter a valid number.");
         }
     }
 
@@ -132,22 +167,31 @@ public class CryptoManager {
 
         try {
             double amount = Double.parseDouble(amountInput);
+
             if (amount <= 0) {
-                System.out.println("Withdrawal amount must be positive.");
+                System.out.println("Error: Withdrawal amount must be positive.");
                 return;
             }
 
-            if (amount > currentUser.getBalance()) {
-                System.out.println("Insufficient funds. Withdrawal amount exceeds balance.");
+            double currentBalance = currentUser.getBalance();
+
+            if (amount > currentBalance) {
+                System.out.printf("Error: Insufficient funds. You tried to withdraw $%.2f but only have $%.2f available.\n",
+                        amount, currentBalance);
                 return;
             }
 
-            double newBalance = currentUser.getBalance() - amount;
+            double oldBalance = currentBalance;
+            double newBalance = oldBalance - amount;
             currentUser.setBalance(newBalance);
+
             System.out.printf("Successfully withdrew $%.2f\n", amount);
-            System.out.printf("New balance: $%.2f\n", currentUser.getBalance());
+            System.out.printf("Old balance: $%.2f\n", oldBalance);
+            System.out.printf("New balance: $%.2f\n", newBalance);
+            System.out.println("Note: Balance will be saved when you logout.");
+
         } catch (NumberFormatException e) {
-            System.out.println("Invalid amount format. Please enter a valid number.");
+            System.out.println("Error: Invalid amount. Please enter a valid number.");
         }
     }
 }

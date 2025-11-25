@@ -35,8 +35,9 @@ public class UserRepository {
     }
 
     private static boolean saveUserToAuthFile(String username, String password) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(AUTH_FILE, true))) {
-            writer.println(username + "," + password);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(AUTH_FILE, true))) {
+            writer.write(username + "," + password);
+            writer.newLine();
             return true;
         } catch (IOException e) {
             System.err.println("Error saving user to auth file: " + e.getMessage());
@@ -45,26 +46,45 @@ public class UserRepository {
     }
 
     public static User loadUser(String username) {
-        // Load user data from individual file
         File userFile = new File(getUserFilePath(username));
         if (!userFile.exists()) {
             return null;
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(userFile))) {
-            String line = reader.readLine();
-            if (line != null) {
-                String[] parts = line.split(",");
+            // First line: balance,realized_profit
+            String firstLine = reader.readLine();
+            if (firstLine != null) {
+                String[] parts = firstLine.split(",");
                 if (parts.length >= 2) {
-                    User user = new User(parts[0]);
-                    user.setBalance(Double.parseDouble(parts[1]));
+                    // Use the proper constructor with all fields
+                    double balance = Double.parseDouble(parts[0].trim());
+                    double realizedProfit = Double.parseDouble(parts[1].trim());
+
+                    // For now, assets is empty until we implement Asset class
+                    User user = new User(username, balance, realizedProfit); //, new ArrayList<>());
+
                     return user;
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | NumberFormatException e) {
             System.err.println("Error loading user: " + e.getMessage());
         }
         return null;
+    }
+
+    public static boolean saveUserData(User user) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(getUserFilePath(user.getUsername())))) {
+            // First line: balance,realized_profit
+            writer.write(user.getBalance() + "," + user.getRealizedProfit()); // MODIFIED THIS LINE
+            writer.newLine();
+
+            // TODO: In the future, save assets here
+            return true;
+        } catch (IOException e) {
+            System.err.println("Error saving user data: " + e.getMessage());
+            return false;
+        }
     }
 
     public static boolean userExists(String username) {
