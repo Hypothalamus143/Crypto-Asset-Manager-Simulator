@@ -18,15 +18,31 @@ public class UserRepository {
     // Private constructor to prevent instantiation
     private UserRepository() {}
 
-    public static boolean saveUser(User user, String password) {
-        // Save credentials to auth.csv
-        if (!saveUserToAuthFile(user.getUsername(), password)) {
-            return false;
+    public static boolean saveUserData(User user, String password) {
+        // If password is provided, also save to auth file (for new users)
+        if (password != null && !password.isEmpty()) {
+            if (!saveUserToAuthFile(user.getUsername(), password)) {
+                return false;
+            }
         }
 
-        // Save user data to individual CSV file
-        try (PrintWriter writer = new PrintWriter(new FileWriter(getUserFilePath(user.getUsername())))) {
-            writer.println(user.getUsername() + "," + user.getBalance());
+        // Always save user data to their file
+        return saveUserToFile(user);
+    }
+
+    // Private method for actual file writing
+    private static boolean saveUserToFile(User user) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(getUserFilePath(user.getUsername())))) {
+            // First line: balance,realized_profit
+            writer.write(user.getBalance() + "," + user.getRealizedProfit());
+            writer.newLine();
+
+            // Save assets
+            for (Asset asset : user.getAssets()) {
+                writer.write(assetToCsvLine(asset));
+                writer.newLine();
+            }
+
             return true;
         } catch (IOException e) {
             System.err.println("Error saving user data: " + e.getMessage());
@@ -57,14 +73,20 @@ public class UserRepository {
             if (firstLine != null) {
                 String[] parts = firstLine.split(",");
                 if (parts.length >= 2) {
-                    // Use the proper constructor with all fields
                     double balance = Double.parseDouble(parts[0].trim());
                     double realizedProfit = Double.parseDouble(parts[1].trim());
+                    List<Asset> assets = new ArrayList<>();
 
-                    // For now, assets is empty until we implement Asset class
-                    User user = new User(username, balance, realizedProfit); //, new ArrayList<>());
+                    // Load assets from subsequent lines
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        Asset asset = parseAssetLine(line);
+                        if (asset != null) {
+                            assets.add(asset);
+                        }
+                    }
 
-                    return user;
+                    return new User(username, balance, realizedProfit, assets);
                 }
             }
         } catch (IOException | NumberFormatException e) {
@@ -73,18 +95,43 @@ public class UserRepository {
         return null;
     }
 
-    public static boolean saveUserData(User user) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(getUserFilePath(user.getUsername())))) {
-            // First line: balance,realized_profit
-            writer.write(user.getBalance() + "," + user.getRealizedProfit()); // MODIFIED THIS LINE
-            writer.newLine();
+    private static Asset parseAssetLine(String line) {
+        try {
+            String[] parts = line.split(",");
+            if (parts.length >= 5) {
+                String type = parts[0].trim();
+                String symbol = parts[1].trim();
+                double buyPrice = Double.parseDouble(parts[2].trim());
+                double amount = Double.parseDouble(parts[3].trim());
+                String timestamp = parts[4].trim();
 
-            // TODO: In the future, save assets here
-            return true;
-        } catch (IOException e) {
-            System.err.println("Error saving user data: " + e.getMessage());
-            return false;
+                switch (type.toLowerCase()) {
+                    case "bitcoin":
+                        return new Bitcoin(buyPrice, amount);
+                    case "ethereum":
+                        return new Ethereum(buyPrice, amount);
+                    case "solana":
+                        return new Solana(buyPrice, amount);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing asset line: " + line);
         }
+        return null;
+    }
+
+    private static String assetToCsvLine(Asset asset) {
+        String type = getAssetType(asset);
+        return String.format("%s,%s,%.2f,%.6f,%s",
+                type, asset.getSymbol(), asset.getBuyPrice(),
+                asset.getAmount(), "purchase_timestamp"); // TODO: Add actual timestamp later
+    }
+
+    private static String getAssetType(Asset asset) {
+        if (asset instanceof Bitcoin) return "bitcoin";
+        if (asset instanceof Ethereum) return "ethereum";
+        if (asset instanceof Solana) return "solana";
+        return "unknown";
     }
 
     public static boolean userExists(String username) {

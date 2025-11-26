@@ -4,13 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e881e91-da38-4fdd-805a-a48f6b26946c" name="Changes" comment="Login functionality">
-      <change afterPath="$PROJECT_DIR$/src/Asset.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Bitcoin.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Ethereum.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/MarketManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Solana.java" afterDir="false" />
+    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="merged">
+      <change afterPath="$PROJECT_DIR$/data/auth.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/market_prices.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/users/john.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Sorter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Crypto-Asset-Manager-Simulator.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Crypto-Asset-Manager-Simulator.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Asset.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Asset.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AuthManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AuthManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CryptoManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/User.java" afterDir="false" />
@@ -28,53 +29,71 @@
       </list>
     </option>
   </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="origin/master" />
+  </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 4
-}]]></component>
-  <component name="ProjectId" id="35z6h7LzZbCf6tLNftiJBnrFuCD" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="35zkuj7bL9l0yAzfJ4sDrpa8mlW" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
     "Application.Main.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
-    "onboarding.tips.debug.path": "/home/john/IdeaProjects/Crypto Asset Manager/src/Main.java"
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="3e881e91-da38-4fdd-805a-a48f6b26946c" name="Changes" comment="" />
-      <created>1764100674064</created>
+      <changelist id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="" />
+      <created>1764120512286</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1764100674064</updated>
+      <updated>1764120512286</updated>
     </task>
-    <task id="LOCAL-00001" summary="Login functionality">
+    <task id="LOCAL-00001" summary="merged">
       <option name="closed" value="true" />
-      <created>1764105513844</created>
+      <created>1764120592967</created>
       <option name="number" value="00001" />
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1764105513844</updated>
+      <updated>1764120592967</updated>
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Login functionality" />
-    <option name="LAST_COMMIT_MESSAGE" value="Login functionality" />
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="merged" />
+    <option name="LAST_COMMIT_MESSAGE" value="merged" />
   </component>
 </project>

@@ -93,13 +93,14 @@ public class AuthManager {
         }
 
         User newUser = new User(username);
-        return UserRepository.saveUser(newUser, password);
+        return UserRepository.saveUserData(newUser, password);
     }
 
+    // In AuthManager.logout()
     public static void logout() {
         if (currentUser != null) {
-            // Save user data (balance) before logging out
-            UserRepository.saveUserData(currentUser);
+            UserRepository.saveUserData(currentUser, null);
+            Sorter.resetToDefault();  // Reset sorting for next user
             System.out.println("Balance saved successfully.");
         }
         currentUser = null;
