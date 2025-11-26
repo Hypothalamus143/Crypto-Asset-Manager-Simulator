@@ -282,7 +282,7 @@ public class CryptoManager {
             System.out.printf("Bought %.6f %s at $%,.2f each\n", amount, symbol, buyPrice);
             System.out.printf("Total cost: $%,.2f\n", totalCost);
             System.out.printf("New balance: $%,.2f\n", currentUser.getBalance());
-            System.out.println("Asset will be saved when you logout.");
+            UserRepository.saveUserData(currentUser, null);
         } else {
             System.out.println("Error: Could not create asset.");
         }
@@ -397,7 +397,6 @@ public class CryptoManager {
             // Partially sold - reduce amount
             asset.setAmount(asset.getAmount() - amountToSell);
         }
-
         // AUTO-SORT after selling (in case removal changed order)
         Sorter.sort(currentUser.getAssets());
 
@@ -405,7 +404,7 @@ public class CryptoManager {
         System.out.printf("Received: $%,.2f\n", totalValue);
         System.out.printf("Realized Profit: $%,.2f\n", realizedProfit);
         System.out.printf("New balance: $%,.2f\n", currentUser.getBalance());
-        System.out.println("Changes will be saved when you logout.");
+        UserRepository.saveUserData(currentUser, null);
     }
 
     private void checkMarket() {
@@ -455,7 +454,7 @@ public class CryptoManager {
             System.out.printf("Successfully deposited $%.2f\n", amount);
             System.out.printf("Old balance: $%.2f\n", oldBalance);
             System.out.printf("New balance: $%.2f\n", newBalance);
-            System.out.println("Note: Balance will be saved when you logout.");
+            UserRepository.saveUserData(currentUser, null);
 
         } catch (NumberFormatException e) {
             System.out.println("Error: Invalid amount. Please enter a valid number.");
@@ -490,7 +489,7 @@ public class CryptoManager {
             System.out.printf("Successfully withdrew $%.2f\n", amount);
             System.out.printf("Old balance: $%.2f\n", oldBalance);
             System.out.printf("New balance: $%.2f\n", newBalance);
-            System.out.println("Note: Balance will be saved when you logout.");
+            UserRepository.saveUserData(currentUser, null);
 
         } catch (NumberFormatException e) {
             System.out.println("Error: Invalid amount. Please enter a valid number.");

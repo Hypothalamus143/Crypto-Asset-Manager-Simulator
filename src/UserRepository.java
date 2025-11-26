@@ -98,12 +98,12 @@ public class UserRepository {
     private static Asset parseAssetLine(String line) {
         try {
             String[] parts = line.split(",");
-            if (parts.length >= 5) {
+            if (parts.length >= 4) { // Changed from 5 to 4 (removed timestamp)
                 String type = parts[0].trim();
                 String symbol = parts[1].trim();
                 double buyPrice = Double.parseDouble(parts[2].trim());
                 double amount = Double.parseDouble(parts[3].trim());
-                String timestamp = parts[4].trim();
+                // Removed timestamp parsing
 
                 switch (type.toLowerCase()) {
                     case "bitcoin":
@@ -122,9 +122,9 @@ public class UserRepository {
 
     private static String assetToCsvLine(Asset asset) {
         String type = getAssetType(asset);
-        return String.format("%s,%s,%.2f,%.6f,%s",
-                type, asset.getSymbol(), asset.getBuyPrice(),
-                asset.getAmount(), "purchase_timestamp"); // TODO: Add actual timestamp later
+        // Removed timestamp from CSV line
+        return String.format("%s,%s,%.2f,%.6f",
+                type, asset.getSymbol(), asset.getBuyPrice(), asset.getAmount());
     }
 
     private static String getAssetType(Asset asset) {
