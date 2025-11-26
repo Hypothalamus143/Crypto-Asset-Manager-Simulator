@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.List;
@@ -13,23 +14,16 @@ public class CryptoManager {
     }
 
     public void start() {
-        boolean running = true;
-        while (running) {
-            // Handle authentication first
-            this.currentUser = AuthManager.authenticateUser();
-
-            if (currentUser != null) {
-                runPortfolioManager();
-            } else {
-                // If authenticateUser returns null, it means user chose to exit
-                running = false;
+        // Launch GUI instead of terminal interface
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new CryptoManagerGUI().show();
             }
-        }
-
-        System.out.println("Thank you for using Crypto Portfolio Manager!");
+        });
     }
 
-    private void runPortfolioManager() {
+    void runPortfolioManager() {
         System.out.println("\nWelcome to your Crypto Portfolio, " + currentUser.getUsername() + "!");
 
         boolean inPortfolio = true;
@@ -494,5 +488,9 @@ public class CryptoManager {
         } catch (NumberFormatException e) {
             System.out.println("Error: Invalid amount. Please enter a valid number.");
         }
+    }
+
+    public void setCurrentUser(User user) {
+        currentUser = user;
     }
 }

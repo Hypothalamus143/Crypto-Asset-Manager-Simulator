@@ -4,8 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="finished terminal functionalities. only polishing remaining...">
+    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="proceed with gui now">
+      <change afterPath="$PROJECT_DIR$/src/CryptoManagerGUI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AuthManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AuthManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CryptoManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,13 +97,22 @@
       <option name="project" value="LOCAL" />
       <updated>1764165741557</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="proceed with gui now">
+      <option name="closed" value="true" />
+      <created>1764167393863</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1764167393863</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="merged" />
     <MESSAGE value="finished terminal functionalities. only polishing remaining..." />
-    <option name="LAST_COMMIT_MESSAGE" value="finished terminal functionalities. only polishing remaining..." />
+    <MESSAGE value="proceed with gui now" />
+    <option name="LAST_COMMIT_MESSAGE" value="proceed with gui now" />
   </component>
 </project>

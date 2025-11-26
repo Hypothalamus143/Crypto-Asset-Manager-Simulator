@@ -7,36 +7,7 @@ public class AuthManager {
     // Private constructor to prevent instantiation
     private AuthManager() {}
 
-    public static User authenticateUser() {
-        System.out.println("\n=== Crypto Portfolio Manager ===");
-
-        while (true) {
-            System.out.println("1. Login");
-            System.out.println("2. Create Account");
-            System.out.println("3. Exit");
-            System.out.print("Choose an option: ");
-
-            String choice = scanner.nextLine().trim();
-
-            switch (choice) {
-                case "1":
-                    User user = login();
-                    if (user != null) return user;
-                    break;
-                case "2":
-                    if (createAccount()) {
-                        System.out.println("Account created! Please login.");
-                    }
-                    break;
-                case "3":
-                    return null; // Signal to exit application
-                default:
-                    System.out.println("Invalid option. Please try again.");
-            }
-        }
-    }
-
-    private static User login() {
+    public static User login() {
         System.out.println("\n--- Login ---");
         System.out.print("Username: ");
         String username = scanner.nextLine().trim();
@@ -59,7 +30,7 @@ public class AuthManager {
         return null;
     }
 
-    private static boolean createAccount() {
+    public static boolean createAccount() {
         System.out.println("\n--- Create Account ---");
         System.out.print("Choose a username: ");
         String username = scanner.nextLine().trim();
