@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Crypto Asset Manager.iml" filepath="$PROJECT_DIR$/Crypto Asset Manager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Crypto-Asset-Manager-Simulator.iml" filepath="$PROJECT_DIR$/.idea/Crypto-Asset-Manager-Simulator.iml" />
     </modules>
   </component>
 </project>
