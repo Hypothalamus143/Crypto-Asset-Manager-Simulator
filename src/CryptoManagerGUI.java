@@ -1,12 +1,18 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class CryptoManagerGUI {
     private JFrame mainFrame;
+    private CardLayout cardLayout;
     private JPanel mainPanel;
     private CryptoManager cryptoManager;
+
+    // Panel constants
+    private static final String LANDING_PANEL = "LANDING";
+    private static final String PORTFOLIO_PANEL = "PORTFOLIO";
 
     public CryptoManagerGUI() {
         this.cryptoManager = new CryptoManager();
@@ -14,24 +20,30 @@ public class CryptoManagerGUI {
     }
 
     private void initializeGUI() {
-        // Create main frame
         mainFrame = new JFrame("Crypto Portfolio Manager");
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainFrame.setSize(400, 300);
+        mainFrame.setSize(800, 600); // Larger for portfolio
         mainFrame.setLocationRelativeTo(null);
 
-        // Set mainPanel to landing panel
-        mainPanel = createLandingPanel();
+        cardLayout = new CardLayout();
+        mainPanel = new JPanel(cardLayout);
+
+        // Create and add panels
+        mainPanel.add(createLandingPanel(), LANDING_PANEL);
+        // Portfolio panel will be created on demand
+
         mainFrame.add(mainPanel);
+        showLandingPanel();
     }
 
     private void handleLogin() {
-        User user = AuthManager.login();  // This calls the GUI login
+        User user = AuthManager.login();
         if (user != null) {
             cryptoManager.setCurrentUser(user);
-            cryptoManager.runPortfolioManager();
+            showPortfolioPanel(user); // Switch to portfolio panel
         }
     }
+
 
     private void handleCreateAccount() {
         // Hide the GUI and run terminal account creation
@@ -49,6 +61,7 @@ public class CryptoManagerGUI {
         // Show the GUI again
         mainFrame.setVisible(true);
     }
+
 
     private JPanel createLandingPanel() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -220,6 +233,256 @@ public class CryptoManagerGUI {
 
         return result[0];
     }
+    private JPanel createPortfolioPanel() {
+        JPanel portfolioPanel = new JPanel(new BorderLayout(10, 10));
+        portfolioPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Header with user info and logout
+        portfolioPanel.add(createPortfolioHeader(), BorderLayout.NORTH);
+
+        // Main content - portfolio summary and assets
+        portfolioPanel.add(createPortfolioContent(), BorderLayout.CENTER);
+
+        // Action buttons at bottom
+        portfolioPanel.add(createActionButtons(), BorderLayout.SOUTH);
+
+        return portfolioPanel;
+    }
+
+    private JPanel createPortfolioHeader() {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+
+        JLabel welcomeLabel = new JLabel("Welcome, " + cryptoManager.getCurrentUser().getUsername() + "!");
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 18));
+
+        JButton logoutButton = new JButton("Logout");
+        logoutButton.addActionListener(e -> handleLogout());
+
+        headerPanel.add(welcomeLabel, BorderLayout.WEST);
+        headerPanel.add(logoutButton, BorderLayout.EAST);
+
+        return headerPanel;
+    }
+
+    private JPanel createPortfolioContent() {
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+
+        // Portfolio summary
+        contentPanel.add(createSummaryPanel(), BorderLayout.NORTH);
+
+        // Assets list
+        contentPanel.add(createAssetsPanel(), BorderLayout.CENTER);
+
+        return contentPanel;
+    }
+
+    private JPanel createSummaryPanel() {
+        JPanel summaryPanel = new JPanel(new GridLayout(2, 3, 10, 5));
+        summaryPanel.setBorder(BorderFactory.createTitledBorder("Portfolio Summary"));
+
+        User user = cryptoManager.getCurrentUser();
+
+        // Calculate total portfolio value
+        double totalValue = user.getBalance();
+        for (Asset asset : user.getAssets()) {
+            totalValue += asset.getTotalValue();
+        }
+
+        JLabel balanceLabel = new JLabel("Balance: $" + String.format("%,.2f", user.getBalance()));
+        JLabel netProfitLabel = new JLabel("Net Profit: $" + String.format("%,.2f", user.getNetProfit()));
+        JLabel realizedProfitLabel = new JLabel("Realized: $" + String.format("%,.2f", user.getRealizedProfit()));
+        JLabel totalValueLabel = new JLabel("Total Value: $" + String.format("%,.2f", totalValue));
+
+        // Style the labels
+        Font boldFont = new Font("Arial", Font.BOLD, 14);
+        balanceLabel.setFont(boldFont);
+        totalValueLabel.setFont(boldFont);
+
+        summaryPanel.add(balanceLabel);
+        summaryPanel.add(netProfitLabel);
+        summaryPanel.add(realizedProfitLabel);
+        summaryPanel.add(totalValueLabel);
+        summaryPanel.add(new JLabel()); // Empty cell
+        summaryPanel.add(new JLabel()); // Empty cell
+
+        return summaryPanel;
+    }
+
+    private JScrollPane createAssetsPanel() {
+        JPanel assetsPanel = new JPanel();
+        assetsPanel.setLayout(new BoxLayout(assetsPanel, BoxLayout.Y_AXIS));
+        assetsPanel.setBorder(BorderFactory.createTitledBorder("Your Assets"));
+
+        List<Asset> assets = cryptoManager.getCurrentUser().getAssets();
+
+        if (assets.isEmpty()) {
+            JLabel emptyLabel = new JLabel("No assets yet. Click 'Buy Crypto' to get started!");
+            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            assetsPanel.add(emptyLabel);
+        } else {
+            for (Asset asset : assets) {
+                assetsPanel.add(createAssetPanel(asset));
+            }
+        }
+
+        JScrollPane scrollPane = new JScrollPane(assetsPanel);
+        scrollPane.setPreferredSize(new Dimension(700, 300));
+
+        return scrollPane;
+    }
+
+    private JPanel createActionButtons() {
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+
+        JButton buyButton = new JButton("Buy Crypto");
+        JButton sellButton = new JButton("Sell Crypto");
+        JButton depositButton = new JButton("Deposit");
+        JButton withdrawButton = new JButton("Withdraw");
+        JButton marketButton = new JButton("Market Prices");
+        JButton sortButton = new JButton("Sort Assets");
+
+        // Add action listeners (to be implemented)
+        buyButton.addActionListener(e -> handleBuy());
+        sellButton.addActionListener(e -> handleSell());
+        depositButton.addActionListener(e -> handleDeposit());
+        withdrawButton.addActionListener(e -> handleWithdraw());
+        marketButton.addActionListener(e -> handleMarket());
+        sortButton.addActionListener(e -> handleSort());
+
+        buttonPanel.add(buyButton);
+        buttonPanel.add(sellButton);
+        buttonPanel.add(depositButton);
+        buttonPanel.add(withdrawButton);
+        buttonPanel.add(marketButton);
+        buttonPanel.add(sortButton);
+
+        return buttonPanel;
+    }
+
+    private void refreshAssetsList(JPanel assetsPanel) {
+        assetsPanel.removeAll();
+
+        List<Asset> assets = cryptoManager.getCurrentUser().getAssets();
+
+        if (assets.isEmpty()) {
+            JLabel emptyLabel = new JLabel("No assets yet. Click 'Buy Crypto' to get started!");
+            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            assetsPanel.add(emptyLabel);
+        } else {
+            for (Asset asset : assets) {
+                assetsPanel.add(createAssetPanel(asset));
+            }
+        }
+
+        assetsPanel.revalidate();
+        assetsPanel.repaint();
+    }
+
+    private JPanel createAssetPanel(Asset asset) {
+        JPanel assetPanel = new JPanel(new BorderLayout());
+        assetPanel.setBorder(BorderFactory.createEtchedBorder());
+        assetPanel.setMaximumSize(new Dimension(700, 80));
+
+        double currentPrice = asset.getCurrentPrice();
+        double unrealizedProfit = asset.getUnrealizedProfit();
+        double profitPercentage = (currentPrice - asset.getBuyPrice()) / asset.getBuyPrice() * 100;
+
+        // Main info
+        JLabel mainInfo = new JLabel(String.format("%.6f %s | Buy: $%,.2f | Current: $%,.2f",
+                asset.getAmount(), asset.getSymbol(), asset.getBuyPrice(), currentPrice));
+
+        // Profit/Loss info
+        JLabel plInfo = new JLabel(String.format("Value: $%,.2f | P/L: $%,.2f (%.2f%%)",
+                asset.getTotalValue(), unrealizedProfit, profitPercentage));
+
+        // Color code based on profit/loss
+        if (unrealizedProfit >= 0) {
+            plInfo.setForeground(Color.GREEN);
+        } else {
+            plInfo.setForeground(Color.RED);
+        }
+
+        JPanel infoPanel = new JPanel(new GridLayout(2, 1));
+        infoPanel.add(mainInfo);
+        infoPanel.add(plInfo);
+
+        assetPanel.add(infoPanel, BorderLayout.CENTER);
+
+        return assetPanel;
+    }
+
+    private void handleLogout() {
+        AuthManager.logout();
+        cryptoManager.setCurrentUser(null);
+        showLandingPanel();
+    }
+
+    // Stub methods for actions (to be implemented)
+    private void handleBuy() {
+        mainFrame.setVisible(false);
+        cryptoManager.buyCrypto(); // Call existing terminal method
+        mainFrame.setVisible(true);
+        showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh with new data
+    }
+
+    private void handleSell() {
+        mainFrame.setVisible(false);
+        cryptoManager.sellCrypto(); // Call existing terminal method
+        mainFrame.setVisible(true);
+        showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh with new data
+    }
+
+    private void handleDeposit() {
+        mainFrame.setVisible(false);
+        cryptoManager.deposit(); // Call existing terminal method
+        mainFrame.setVisible(true);
+        showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh with new data
+    }
+
+    private void handleWithdraw() {
+        mainFrame.setVisible(false);
+        cryptoManager.withdraw(); // Call existing terminal method
+        mainFrame.setVisible(true);
+        showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh with new data
+    }
+
+    private void handleMarket() {
+        mainFrame.setVisible(false);
+        cryptoManager.checkMarket(); // Call existing terminal method
+        mainFrame.setVisible(true);
+        // No need to refresh portfolio since market check doesn't change user data
+    }
+
+    private void handleSort() {
+        mainFrame.setVisible(false);
+        cryptoManager.sortLots(); // Call existing terminal method
+        mainFrame.setVisible(true);
+        showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh with sorted data
+    }
+
+    public void showLandingPanel() {
+        cardLayout.show(mainPanel, LANDING_PANEL);
+    }
+
+    public void showPortfolioPanel(User user) {
+        // Always create a fresh portfolio panel
+        JPanel portfolioPanel = createPortfolioPanel();
+
+        // Remove existing portfolio panel if any
+        Component[] comps = mainPanel.getComponents();
+        for (Component comp : comps) {
+            if (comp.getName() != null && comp.getName().equals(PORTFOLIO_PANEL)) {
+                mainPanel.remove(comp);
+            }
+        }
+
+        portfolioPanel.setName(PORTFOLIO_PANEL);
+        mainPanel.add(portfolioPanel, PORTFOLIO_PANEL);
+        cardLayout.show(mainPanel, PORTFOLIO_PANEL);
+
+        // No refresh needed - panel is created fresh with latest data
+    }
+
     public void show() {
         mainFrame.setVisible(true);
     }

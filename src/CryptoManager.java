@@ -78,7 +78,7 @@ public class CryptoManager {
         System.out.print("Choose an option: ");
     }
 
-    private void sortLots() {
+    void sortLots() {
         System.out.println("\n--- Sort Lots ---");
 
         if (currentUser.getAssets().isEmpty()) {
