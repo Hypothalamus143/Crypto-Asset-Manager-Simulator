@@ -23,7 +23,7 @@ public class CryptoManager {
         });
     }
 
-    void runPortfolioManager() {
+    public void runPortfolioManager() {
         System.out.println("\nWelcome to your Crypto Portfolio, " + currentUser.getUsername() + "!");
 
         boolean inPortfolio = true;
@@ -63,6 +63,7 @@ public class CryptoManager {
             }
         }
     }
+
     private void showMainMenu() {
         System.out.println("\n=== Main Menu ===");
         System.out.println("1. View Portfolio");
@@ -190,7 +191,7 @@ public class CryptoManager {
         }
     }
 
-    private void buyCrypto() {
+    void buyCrypto() {
         System.out.println("\n--- Buy Crypto ---");
 
         // Show available cryptocurrencies
@@ -304,7 +305,7 @@ public class CryptoManager {
         }
     }
 
-    private void sellCrypto() {
+    void sellCrypto() {
         System.out.println("\n--- Sell Crypto ---");
 
         List<Asset> assets = currentUser.getAssets();
@@ -401,7 +402,7 @@ public class CryptoManager {
         UserRepository.saveUserData(currentUser, null);
     }
 
-    private void checkMarket() {
+    void checkMarket() {
         System.out.println("\n--- Market Prices ---");
 
         // Update all asset prices using static method
@@ -423,7 +424,7 @@ public class CryptoManager {
         System.out.println("These new prices will be used for any new purchases.");
     }
 
-    private void deposit() {
+    void deposit() {
         System.out.println("\n--- Deposit Funds ---");
         System.out.print("Enter amount to deposit: $");
         String amountInput = scanner.nextLine();
@@ -455,7 +456,7 @@ public class CryptoManager {
         }
     }
 
-    private void withdraw() {
+    void withdraw() {
         System.out.println("\n--- Withdraw Funds ---");
         System.out.print("Enter amount to withdraw: $");
         String amountInput = scanner.nextLine();
@@ -492,5 +493,9 @@ public class CryptoManager {
 
     public void setCurrentUser(User user) {
         currentUser = user;
+    }
+
+    public User getCurrentUser() {
+        return currentUser;
     }
 }
