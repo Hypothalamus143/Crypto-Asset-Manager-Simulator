@@ -296,7 +296,7 @@ public class CryptoManager {
         }
     }
 
-    private String getAssetName(String symbol) {
+    String getAssetName(String symbol) {
         switch (symbol.toUpperCase()) {
             case "BTC": return "Bitcoin";
             case "ETH": return "Ethereum";
@@ -425,23 +425,10 @@ public class CryptoManager {
     }
 
     void deposit() {
-        System.out.println("\n--- Deposit Funds ---");
-        System.out.print("Enter amount to deposit: $");
-        String amountInput = scanner.nextLine();
+        double amount = CryptoManagerGUI.showDepositGUI(currentUser.getBalance());
 
-        try {
-            double amount = Double.parseDouble(amountInput);
-
-            if (amount <= 0) {
-                System.out.println("Error: Deposit amount must be positive.");
-                return;
-            }
-
-            if (amount > 1000000) { // Reasonable limit
-                System.out.println("Error: Deposit amount cannot exceed $1,000,000.");
-                return;
-            }
-
+        if (amount > 0) {
+            // Execute the deposit
             double oldBalance = currentUser.getBalance();
             double newBalance = oldBalance + amount;
             currentUser.setBalance(newBalance);
@@ -451,33 +438,19 @@ public class CryptoManager {
             System.out.printf("New balance: $%.2f\n", newBalance);
             UserRepository.saveUserData(currentUser, null);
 
-        } catch (NumberFormatException e) {
-            System.out.println("Error: Invalid amount. Please enter a valid number.");
+            JOptionPane.showMessageDialog(null,
+                    String.format("Deposited $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
+                    "Deposit Successful",
+                    JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
     void withdraw() {
-        System.out.println("\n--- Withdraw Funds ---");
-        System.out.print("Enter amount to withdraw: $");
-        String amountInput = scanner.nextLine();
+        double amount = CryptoManagerGUI.showWithdrawGUI(currentUser.getBalance());
 
-        try {
-            double amount = Double.parseDouble(amountInput);
-
-            if (amount <= 0) {
-                System.out.println("Error: Withdrawal amount must be positive.");
-                return;
-            }
-
-            double currentBalance = currentUser.getBalance();
-
-            if (amount > currentBalance) {
-                System.out.printf("Error: Insufficient funds. You tried to withdraw $%.2f but only have $%.2f available.\n",
-                        amount, currentBalance);
-                return;
-            }
-
-            double oldBalance = currentBalance;
+        if (amount > 0) {
+            // Execute the withdrawal
+            double oldBalance = currentUser.getBalance();
             double newBalance = oldBalance - amount;
             currentUser.setBalance(newBalance);
 
@@ -486,8 +459,10 @@ public class CryptoManager {
             System.out.printf("New balance: $%.2f\n", newBalance);
             UserRepository.saveUserData(currentUser, null);
 
-        } catch (NumberFormatException e) {
-            System.out.println("Error: Invalid amount. Please enter a valid number.");
+            JOptionPane.showMessageDialog(null,
+                    String.format("Withdrew $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
+                    "Withdrawal Successful",
+                    JOptionPane.INFORMATION_MESSAGE);
         }
     }
 

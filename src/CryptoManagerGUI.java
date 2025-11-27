@@ -3,6 +3,7 @@ import java.awt.*;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 
 public class CryptoManagerGUI {
     private JFrame mainFrame;
@@ -249,6 +250,45 @@ public class CryptoManagerGUI {
         return portfolioPanel;
     }
 
+    private JPanel createMarketPricesPanel() {
+        JPanel marketPanel = new JPanel();
+        marketPanel.setLayout(new BoxLayout(marketPanel, BoxLayout.Y_AXIS));
+        marketPanel.setBorder(BorderFactory.createTitledBorder("Market Prices"));
+        marketPanel.setPreferredSize(new Dimension(250, 300));
+
+        // Get current market prices
+        Map<String, Double> marketPrices = MarketManager.getAllPrices();
+
+        if (marketPrices.isEmpty()) {
+            JLabel emptyLabel = new JLabel("No market data available");
+            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            marketPanel.add(emptyLabel);
+        } else {
+            for (Map.Entry<String, Double> entry : marketPrices.entrySet()) {
+                marketPanel.add(createMarketPricePanel(entry.getKey(), entry.getValue()));
+            }
+        }
+
+        return marketPanel;
+    }
+
+    private JPanel createMarketPricePanel(String symbol, double price) {
+        JPanel pricePanel = new JPanel(new BorderLayout());
+        pricePanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        pricePanel.setMaximumSize(new Dimension(230, 40));
+
+        String assetName = cryptoManager.getAssetName(symbol);
+        JLabel symbolLabel = new JLabel(assetName + " (" + symbol + ")");
+        JLabel priceLabel = new JLabel("$" + String.format("%,.2f", price));
+
+        priceLabel.setFont(new Font("Arial", Font.BOLD, 12));
+
+        pricePanel.add(symbolLabel, BorderLayout.WEST);
+        pricePanel.add(priceLabel, BorderLayout.EAST);
+
+        return pricePanel;
+    }
+
     private JPanel createPortfolioHeader() {
         JPanel headerPanel = new JPanel(new BorderLayout());
 
@@ -270,8 +310,13 @@ public class CryptoManagerGUI {
         // Portfolio summary
         contentPanel.add(createSummaryPanel(), BorderLayout.NORTH);
 
-        // Assets list
-        contentPanel.add(createAssetsPanel(), BorderLayout.CENTER);
+        // Main content area - split between assets and market prices
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane.setLeftComponent(createAssetsPanel());
+        splitPane.setRightComponent(createMarketPricesPanel());
+        splitPane.setDividerLocation(500); // Adjust based on your preference
+
+        contentPanel.add(splitPane, BorderLayout.CENTER);
 
         return contentPanel;
     }
@@ -433,21 +478,16 @@ public class CryptoManagerGUI {
     }
 
     private void handleDeposit() {
-        mainFrame.setVisible(false);
-        cryptoManager.deposit(); // Call existing terminal method
-        mainFrame.setVisible(true);
-        showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh with new data
+        cryptoManager.deposit(); // This now calls the GUI internally
+        showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh with new balance
     }
 
     private void handleWithdraw() {
-        mainFrame.setVisible(false);
-        cryptoManager.withdraw(); // Call existing terminal method
-        mainFrame.setVisible(true);
-        showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh with new data
+        cryptoManager.withdraw(); // This now calls the GUI internally
+        showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh with new balance
     }
 
     private void handleMarket() {
-        mainFrame.setVisible(false);
         cryptoManager.checkMarket(); // Call existing terminal method
         mainFrame.setVisible(true);
         // No need to refresh portfolio since market check doesn't change user data
@@ -482,7 +522,130 @@ public class CryptoManagerGUI {
 
         // No refresh needed - panel is created fresh with latest data
     }
+    public static double showWithdrawGUI(double currentBalance) {
+        JDialog withdrawDialog = new JDialog((JFrame)null, "Withdraw Funds", true);
+        withdrawDialog.setSize(300, 200);
+        withdrawDialog.setLocationRelativeTo(null);
+        withdrawDialog.setResizable(false);
 
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel balanceLabel = new JLabel("Current Balance:");
+        JLabel balanceValue = new JLabel("$" + String.format("%,.2f", currentBalance));
+        JLabel amountLabel = new JLabel("Withdraw Amount:");
+        JTextField amountField = new JTextField();
+
+        JButton withdrawBtn = new JButton("Withdraw");
+        JButton cancelBtn = new JButton("Cancel");
+
+        panel.add(balanceLabel);
+        panel.add(balanceValue);
+        panel.add(amountLabel);
+        panel.add(amountField);
+        panel.add(withdrawBtn);
+        panel.add(cancelBtn);
+
+        final double[] result = new double[]{-1}; // -1 means cancelled
+
+        withdrawBtn.addActionListener(e -> {
+            try {
+                double amount = Double.parseDouble(amountField.getText().trim());
+
+                if (amount <= 0) {
+                    JOptionPane.showMessageDialog(withdrawDialog, "Amount must be positive");
+                    return;
+                }
+
+                if (amount > currentBalance) {
+                    JOptionPane.showMessageDialog(withdrawDialog,
+                            String.format("Insufficient funds. You have $%,.2f", currentBalance));
+                    return;
+                }
+
+                result[0] = amount;
+                withdrawDialog.dispose();
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(withdrawDialog, "Please enter a valid amount");
+            }
+        });
+
+        cancelBtn.addActionListener(e -> {
+            withdrawDialog.dispose();
+        });
+
+        // Enter key support
+        amountField.addActionListener(e -> withdrawBtn.doClick());
+
+        withdrawDialog.add(panel);
+        withdrawDialog.pack();
+        withdrawDialog.setVisible(true);
+
+        return result[0];
+    }
+
+    public static double showDepositGUI(double currentBalance) {
+        JDialog depositDialog = new JDialog((JFrame)null, "Deposit Funds", true);
+        depositDialog.setSize(300, 200);
+        depositDialog.setLocationRelativeTo(null);
+        depositDialog.setResizable(false);
+
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel balanceLabel = new JLabel("Current Balance:");
+        JLabel balanceValue = new JLabel("$" + String.format("%,.2f", currentBalance));
+        JLabel amountLabel = new JLabel("Deposit Amount:");
+        JTextField amountField = new JTextField();
+
+        JButton depositBtn = new JButton("Deposit");
+        JButton cancelBtn = new JButton("Cancel");
+
+        panel.add(balanceLabel);
+        panel.add(balanceValue);
+        panel.add(amountLabel);
+        panel.add(amountField);
+        panel.add(depositBtn);
+        panel.add(cancelBtn);
+
+        final double[] result = new double[]{-1}; // -1 means cancelled
+
+        depositBtn.addActionListener(e -> {
+            try {
+                double amount = Double.parseDouble(amountField.getText().trim());
+
+                if (amount <= 0) {
+                    JOptionPane.showMessageDialog(depositDialog, "Amount must be positive");
+                    return;
+                }
+
+                if (amount > 1000000) {
+                    JOptionPane.showMessageDialog(depositDialog, "Deposit amount cannot exceed $1,000,000");
+                    return;
+                }
+
+                result[0] = amount;
+                depositDialog.dispose();
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(depositDialog, "Please enter a valid amount");
+            }
+        });
+
+        cancelBtn.addActionListener(e -> {
+            depositDialog.dispose();
+        });
+
+        // Enter key support
+        amountField.addActionListener(e -> depositBtn.doClick());
+
+        depositDialog.add(panel);
+        depositDialog.pack();
+        depositDialog.setVisible(true);
+
+        return result[0];
+    }
     public void show() {
         mainFrame.setVisible(true);
     }
