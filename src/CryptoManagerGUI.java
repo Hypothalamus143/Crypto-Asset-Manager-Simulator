@@ -269,6 +269,14 @@ public class CryptoManagerGUI {
             }
         }
 
+        // Add refresh button at the bottom
+        JButton refreshButton = new JButton("Refresh Prices");
+        refreshButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        refreshButton.addActionListener(e -> handleMarket());
+
+        marketPanel.add(Box.createVerticalStrut(10)); // Add some space
+        marketPanel.add(refreshButton);
+
         return marketPanel;
     }
 
@@ -353,29 +361,51 @@ public class CryptoManagerGUI {
         return summaryPanel;
     }
 
-    private JScrollPane createAssetsPanel() {
-        JPanel assetsPanel = new JPanel();
-        assetsPanel.setLayout(new BoxLayout(assetsPanel, BoxLayout.Y_AXIS));
-        assetsPanel.setBorder(BorderFactory.createTitledBorder("Your Assets"));
+    private JPanel createAssetsPanel() {
+        JPanel assetsContainer = new JPanel();
+        assetsContainer.setLayout(new BorderLayout());
+        assetsContainer.setBorder(BorderFactory.createTitledBorder("Your Assets"));
 
-        List<Asset> assets = cryptoManager.getCurrentUser().getAssets();
+        // Create sorting controls panel
+        JPanel sortPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        if (assets.isEmpty()) {
-            JLabel emptyLabel = new JLabel("No assets yet. Click 'Buy Crypto' to get started!");
-            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            assetsPanel.add(emptyLabel);
-        } else {
-            for (Asset asset : assets) {
-                assetsPanel.add(createAssetPanel(asset));
-            }
-        }
+        // Sort by dropdown
+        String[] sortOptions = {"Symbol", "Total Value", "Profit Amount", "Profit Percentage", "Buy Price", "Amount"};
+        JComboBox<String> sortByCombo = new JComboBox<>(sortOptions);
 
-        JScrollPane scrollPane = new JScrollPane(assetsPanel);
-        scrollPane.setPreferredSize(new Dimension(700, 300));
+        // Sort direction dropdown
+        String[] directionOptions = {"Ascending", "Descending"};
+        JComboBox<String> directionCombo = new JComboBox<>(directionOptions);
 
-        return scrollPane;
+        sortPanel.add(new JLabel("Sort by:"));
+        sortPanel.add(sortByCombo);
+        sortPanel.add(new JLabel("Order:"));
+        sortPanel.add(directionCombo);
+
+        // Assets list panel
+        JPanel assetsListPanel = new JPanel();
+        assetsListPanel.setLayout(new BoxLayout(assetsListPanel, BoxLayout.Y_AXIS));
+
+        // Populate assets
+        refreshAssetsList(assetsListPanel);
+
+        JScrollPane scrollPane = new JScrollPane(assetsListPanel);
+        scrollPane.setPreferredSize(new Dimension(500, 300));
+
+        // Add action listeners for auto-sort
+        ActionListener sortListener = e -> {
+            handleSort((String) sortByCombo.getSelectedItem(),
+                    (String) directionCombo.getSelectedItem());
+        };
+
+        sortByCombo.addActionListener(sortListener);
+        directionCombo.addActionListener(sortListener);
+
+        assetsContainer.add(sortPanel, BorderLayout.NORTH);
+        assetsContainer.add(scrollPane, BorderLayout.CENTER);
+
+        return assetsContainer;
     }
-
     private JPanel createActionButtons() {
         JPanel buttonPanel = new JPanel(new FlowLayout());
 
@@ -383,23 +413,17 @@ public class CryptoManagerGUI {
         JButton sellButton = new JButton("Sell Crypto");
         JButton depositButton = new JButton("Deposit");
         JButton withdrawButton = new JButton("Withdraw");
-        JButton marketButton = new JButton("Market Prices");
-        JButton sortButton = new JButton("Sort Assets");
 
         // Add action listeners (to be implemented)
         buyButton.addActionListener(e -> handleBuy());
         sellButton.addActionListener(e -> handleSell());
         depositButton.addActionListener(e -> handleDeposit());
         withdrawButton.addActionListener(e -> handleWithdraw());
-        marketButton.addActionListener(e -> handleMarket());
-        sortButton.addActionListener(e -> handleSort());
 
         buttonPanel.add(buyButton);
         buttonPanel.add(sellButton);
         buttonPanel.add(depositButton);
         buttonPanel.add(withdrawButton);
-        buttonPanel.add(marketButton);
-        buttonPanel.add(sortButton);
 
         return buttonPanel;
     }
@@ -426,18 +450,19 @@ public class CryptoManagerGUI {
     private JPanel createAssetPanel(Asset asset) {
         JPanel assetPanel = new JPanel(new BorderLayout());
         assetPanel.setBorder(BorderFactory.createEtchedBorder());
-        assetPanel.setMaximumSize(new Dimension(700, 80));
+        assetPanel.setMaximumSize(new Dimension(700, 60)); // Reduced height
 
         double currentPrice = asset.getCurrentPrice();
         double unrealizedProfit = asset.getUnrealizedProfit();
         double profitPercentage = (currentPrice - asset.getBuyPrice()) / asset.getBuyPrice() * 100;
 
-        // Main info
-        JLabel mainInfo = new JLabel(String.format("%.6f %s | Buy: $%,.2f | Current: $%,.2f",
-                asset.getAmount(), asset.getSymbol(), asset.getBuyPrice(), currentPrice));
+        // Simplified main info - only show current market price
+        JLabel mainInfo = new JLabel(String.format("%.6f %s | Price Bought: $%,.2f",
+                asset.getAmount(), asset.getSymbol(), asset.getBuyPrice()));
+        mainInfo.setFont(new Font("Arial", Font.BOLD, 12));
 
         // Profit/Loss info
-        JLabel plInfo = new JLabel(String.format("Value: $%,.2f | P/L: $%,.2f (%.2f%%)",
+        JLabel plInfo = new JLabel(String.format("Total Value: $%,.2f | P/L: $%,.2f (%.2f%%)",
                 asset.getTotalValue(), unrealizedProfit, profitPercentage));
 
         // Color code based on profit/loss
@@ -490,13 +515,11 @@ public class CryptoManagerGUI {
     private void handleMarket() {
         cryptoManager.checkMarket(); // Call existing terminal method
         mainFrame.setVisible(true);
-        // No need to refresh portfolio since market check doesn't change user data
+        showPortfolioPanel(cryptoManager.getCurrentUser());
     }
 
-    private void handleSort() {
-        mainFrame.setVisible(false);
-        cryptoManager.sortLots(); // Call existing terminal method
-        mainFrame.setVisible(true);
+    private void handleSort(String sortBy, String direction) {
+        cryptoManager.sortLots(sortBy, direction); // Call the modified terminal method
         showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh with sorted data
     }
 

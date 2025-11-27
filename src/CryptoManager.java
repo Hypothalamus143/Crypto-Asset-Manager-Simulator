@@ -23,47 +23,6 @@ public class CryptoManager {
         });
     }
 
-    public void runPortfolioManager() {
-        System.out.println("\nWelcome to your Crypto Portfolio, " + currentUser.getUsername() + "!");
-
-        boolean inPortfolio = true;
-        while (inPortfolio) {
-            showMainMenu();
-            String choice = scanner.nextLine().trim();
-
-            switch (choice) {
-                case "1":
-                    viewPortfolio();
-                    break;
-                case "2":
-                    buyCrypto();
-                    break;
-                case "3":
-                    sellCrypto();
-                    break;
-                case "4":
-                    checkMarket();
-                    break;
-                case "5":
-                    deposit();
-                    break;
-                case "6":
-                    withdraw();
-                    break;
-                case "7":  // NEW: Sort Lots option
-                    sortLots();
-                    break;
-                case "8":
-                    inPortfolio = false;
-                    AuthManager.logout();
-                    System.out.println("Returning to login screen...\n");
-                    break;
-                default:
-                    System.out.println("Invalid option. Please try again.");
-            }
-        }
-    }
-
     private void showMainMenu() {
         System.out.println("\n=== Main Menu ===");
         System.out.println("1. View Portfolio");
@@ -78,7 +37,7 @@ public class CryptoManager {
         System.out.print("Choose an option: ");
     }
 
-    void sortLots() {
+    public void sortLots(String sortBy, String direction) {
         System.out.println("\n--- Sort Lots ---");
 
         if (currentUser.getAssets().isEmpty()) {
@@ -86,56 +45,27 @@ public class CryptoManager {
             return;
         }
 
-        // Get sort type from user
-        System.out.println("Sort by:");
-        System.out.println("1. Symbol");
-        System.out.println("2. Total Value");
-        System.out.println("3. Profit Amount");
-        System.out.println("4. Profit Percentage");
-        System.out.println("5. Buy Price");
-        System.out.println("6. Amount");
-        System.out.print("Choose (1-6, default 1): ");
-
-        int choice;
-        try {
-            choice = Integer.parseInt(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
-            choice = 1;
-        }
-
-        // Get sort direction from user
-        System.out.println("Direction:");
-        System.out.println("1. Ascending");
-        System.out.println("2. Descending");
-        System.out.print("Choose (1-2, default 2): ");
-
-        boolean ascending;
-        try {
-            int dirChoice = Integer.parseInt(scanner.nextLine().trim());
-            ascending = (dirChoice == 1);
-        } catch (NumberFormatException e) {
-            ascending = false;
-        }
+        boolean ascending = direction.equals("Ascending");
 
         // Create the appropriate comparator
         Comparator<Asset> comparator;
-        switch (choice) {
-            case 1:
+        switch (sortBy) {
+            case "Symbol":
                 comparator = new Asset.SymbolComparator(ascending);
                 break;
-            case 2:
+            case "Total Value":
                 comparator = new Asset.TotalValueComparator(ascending);
                 break;
-            case 3:
+            case "Profit Amount":
                 comparator = new Asset.ProfitAmountComparator(ascending);
                 break;
-            case 4:
+            case "Profit Percentage":
                 comparator = new Asset.ProfitPercentComparator(ascending);
                 break;
-            case 5:
+            case "Buy Price":
                 comparator = new Asset.BuyPriceComparator(ascending);
                 break;
-            case 6:
+            case "Amount":
                 comparator = new Asset.AmountComparator(ascending);
                 break;
             default:
@@ -148,9 +78,6 @@ public class CryptoManager {
 
         System.out.printf("\nSort order changed to: %s\n", Sorter.getCurrentSortDescription());
         System.out.println("Portfolio has been sorted.");
-
-        // Use the existing viewPortfolio function to show the result
-        viewPortfolio();
     }
 
     private void viewPortfolio() {
