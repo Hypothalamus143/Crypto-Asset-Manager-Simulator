@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="added the run portfolio gui">
+    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="sorting and refresh done">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/market_prices.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/market_prices.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/users/john.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/users/john.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CryptoManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CryptoManagerGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManagerGUI.java" afterDir="false" />
@@ -120,7 +119,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764208447343</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="sorting and refresh done">
+      <option name="closed" value="true" />
+      <created>1764235167792</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1764235167792</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -141,6 +148,7 @@
     <MESSAGE value="proceed with gui now" />
     <MESSAGE value="some gui, push for safety" />
     <MESSAGE value="added the run portfolio gui" />
-    <option name="LAST_COMMIT_MESSAGE" value="added the run portfolio gui" />
+    <MESSAGE value="sorting and refresh done" />
+    <option name="LAST_COMMIT_MESSAGE" value="sorting and refresh done" />
   </component>
 </project>

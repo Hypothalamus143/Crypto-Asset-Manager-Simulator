@@ -118,75 +118,30 @@ public class CryptoManager {
         }
     }
 
-    void buyCrypto() {
+    public void buyCrypto(String symbol, double currentPrice, double amount) {
         System.out.println("\n--- Buy Crypto ---");
 
-        // Show available cryptocurrencies
-        System.out.println("Available Cryptocurrencies:");
-        Map<String, Double> marketPrices = MarketManager.getAllPrices();
-        int index = 1;
-        List<String> symbols = new ArrayList<>(marketPrices.keySet());
+        double totalCost = currentPrice * amount;
 
-        for (String symbol : symbols) {
-            String assetName = getAssetName(symbol);
-            double price = marketPrices.get(symbol);
-            System.out.printf("%d. %s (%s) - $%,.2f\n", index++, assetName, symbol, price);
+        // Check if user has enough balance
+        if (totalCost > currentUser.getBalance()) {
+            System.out.printf("Insufficient funds. You need $%,.2f but only have $%,.2f\n",
+                    totalCost, currentUser.getBalance());
+            return;
         }
 
-        // Get user selection
-        System.out.print("Select cryptocurrency (1-" + symbols.size() + "): ");
-        try {
-            int choice = Integer.parseInt(scanner.nextLine().trim());
-            if (choice < 1 || choice > symbols.size()) {
-                System.out.println("Invalid selection.");
-                return;
-            }
+        // Confirm purchase (in terminal, we'll assume yes since GUI already confirmed)
+        System.out.printf("\nPurchase Summary:\n");
+        System.out.printf("Asset: %s (%s)\n", getAssetName(symbol), symbol);
+        System.out.printf("Amount: %.6f\n", amount);
+        System.out.printf("Price: $%,.2f\n", currentPrice);
+        System.out.printf("Total Cost: $%,.2f\n", totalCost);
+        System.out.println("Purchase confirmed via GUI.");
 
-            String selectedSymbol = symbols.get(choice - 1);
-            String assetName = getAssetName(selectedSymbol);
-            double currentPrice = marketPrices.get(selectedSymbol);
-
-            // Get amount to buy
-            System.out.printf("Current %s price: $%,.2f\n", assetName, currentPrice);
-            System.out.print("Enter amount to buy: ");
-            double amount = Double.parseDouble(scanner.nextLine().trim());
-
-            if (amount <= 0) {
-                System.out.println("Amount must be positive.");
-                return;
-            }
-
-            // Calculate total cost
-            double totalCost = currentPrice * amount;
-
-            // Check if user has enough balance
-            if (totalCost > currentUser.getBalance()) {
-                System.out.printf("Insufficient funds. You need $%,.2f but only have $%,.2f\n",
-                        totalCost, currentUser.getBalance());
-                return;
-            }
-
-            // Confirm purchase
-            System.out.printf("\nPurchase Summary:\n");
-            System.out.printf("Asset: %s (%s)\n", assetName, selectedSymbol);
-            System.out.printf("Amount: %.6f\n", amount);
-            System.out.printf("Price: $%,.2f\n", currentPrice);
-            System.out.printf("Total Cost: $%,.2f\n", totalCost);
-            System.out.print("Confirm purchase? (yes/no): ");
-
-            String confirmation = scanner.nextLine().trim().toLowerCase();
-            if (!confirmation.equals("yes") && !confirmation.equals("y")) {
-                System.out.println("Purchase cancelled.");
-                return;
-            }
-
-            // Execute purchase
-            executePurchase(selectedSymbol, currentPrice, amount, totalCost);
-
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid input. Please enter valid numbers.");
-        }
+        // Execute purchase
+        executePurchase(symbol, currentPrice, amount, totalCost);
     }
+
 
     private void executePurchase(String symbol, double buyPrice, double amount, double totalCost) {
         // Create the asset
@@ -232,68 +187,23 @@ public class CryptoManager {
         }
     }
 
-    void sellCrypto() {
+    public void sellCrypto(Asset asset, double amountToSell) {
         System.out.println("\n--- Sell Crypto ---");
 
-        List<Asset> assets = currentUser.getAssets();
+        double currentPrice = asset.getCurrentPrice();
+        double totalValue = amountToSell * currentPrice;
+        double realizedProfit = (currentPrice - asset.getBuyPrice()) * amountToSell;
 
-        if (assets.isEmpty()) {
-            System.out.println("You don't own any assets to sell.");
-            return;
-        }
+        System.out.printf("\nSale Summary:\n");
+        System.out.printf("Asset: %s (%s)\n", asset.getName(), asset.getSymbol());
+        System.out.printf("Amount: %.6f\n", amountToSell);
+        System.out.printf("Sell Price: $%,.2f\n", currentPrice);
+        System.out.printf("Total Value: $%,.2f\n", totalValue);
+        System.out.printf("Realized Profit: $%,.2f\n", realizedProfit);
+        System.out.println("Sale confirmed via GUI.");
 
-        viewPortfolio();
-
-        try {
-            // Select lot to sell from
-            System.out.print("\nSelect lot to sell from (1-" + assets.size() + "): ");
-            int lotChoice = Integer.parseInt(scanner.nextLine().trim());
-            if (lotChoice < 1 || lotChoice > assets.size()) {
-                System.out.println("Invalid lot selection.");
-                return;
-            }
-
-            Asset selectedAsset = assets.get(lotChoice - 1);
-            double currentPrice = selectedAsset.getCurrentPrice();
-
-            // Get amount to sell
-            System.out.printf("Enter amount to sell (max %.6f): ", selectedAsset.getAmount());
-            double amountToSell = Double.parseDouble(scanner.nextLine().trim());
-
-            if (amountToSell <= 0) {
-                System.out.println("Amount must be positive.");
-                return;
-            }
-
-            if (amountToSell > selectedAsset.getAmount()) {
-                System.out.printf("Insufficient amount. You only have %.6f in this lot.\n", selectedAsset.getAmount());
-                return;
-            }
-
-            // Confirm sale
-            double totalValue = amountToSell * currentPrice;
-            double realizedProfit = (currentPrice - selectedAsset.getBuyPrice()) * amountToSell;
-
-            System.out.printf("\nSale Summary:\n");
-            System.out.printf("Asset: %s (%s)\n", selectedAsset.getName(), selectedAsset.getSymbol());
-            System.out.printf("Amount: %.6f\n", amountToSell);
-            System.out.printf("Sell Price: $%,.2f\n", currentPrice);
-            System.out.printf("Total Value: $%,.2f\n", totalValue);
-            System.out.printf("Realized Profit: $%,.2f\n", realizedProfit);
-            System.out.print("Confirm sale? (yes/no): ");
-
-            String confirmation = scanner.nextLine().trim().toLowerCase();
-            if (!confirmation.equals("yes") && !confirmation.equals("y")) {
-                System.out.println("Sale cancelled.");
-                return;
-            }
-
-            // Execute sale (same as before)
-            executeSale(selectedAsset, amountToSell, currentPrice, realizedProfit, totalValue);
-
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid input. Please enter valid numbers.");
-        }
+        // Execute sale
+        executeSale(asset, amountToSell, currentPrice, realizedProfit, totalValue);
     }
 
     private Map<String, List<Asset>> groupAssetsBySymbol() {
