@@ -34,10 +34,13 @@ public class CryptoManagerGUI {
     }
 
     private void initializeGUI() {
+        // Create main frame with larger size
         mainFrame = new JFrame("Crypto Portfolio Manager");
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainFrame.setSize(800, 600); // Larger for portfolio
-        mainFrame.setLocationRelativeTo(null);
+        mainFrame.setSize(1000, 900); // Increased from 800x600 to 1000x700
+        mainFrame.setLocationRelativeTo(null); // Center the window
+
+        setupResizeListener();
 
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
@@ -248,19 +251,31 @@ public class CryptoManagerGUI {
         return result[0];
     }
     private JPanel createPortfolioContent() {
-        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridx = 0;
 
-        // Chart panel at the top
-        chartPanel = createChartPanel(); // Default to Bitcoin
-        contentPanel.add(chartPanel, BorderLayout.NORTH);
+        // Summary panel - top
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.0; // Doesn't expand vertically
+        contentPanel.add(createSummaryPanel(), gbc);
 
-        // Main content area - split between assets and market prices
+        // Chart panel - middle
+        gbc.gridy = 1;
+        gbc.weighty = 0.3; // Takes 30% of vertical space
+        chartPanel = createChartPanel();
+        contentPanel.add(chartPanel, gbc);
+
+        // Split pane - bottom
+        gbc.gridy = 2;
+        gbc.weighty = 0.7; // Takes 70% of vertical space
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setLeftComponent(createAssetsPanel());
         splitPane.setRightComponent(createMarketPricesPanel());
-        splitPane.setDividerLocation(500);
-
-        contentPanel.add(splitPane, BorderLayout.CENTER);
+        splitPane.setDividerLocation(0.65); // Percentage instead of pixels
+        contentPanel.add(splitPane, gbc);
 
         return contentPanel;
     }
@@ -297,7 +312,6 @@ public class CryptoManagerGUI {
         // Update title
         chartContainer.setBorder(BorderFactory.createTitledBorder(
                 MarketManager.getCryptoName(symbol) + " (" + symbol + ") Price Chart"));
-
         chartContainer.revalidate();
         chartContainer.repaint();
     }
@@ -307,19 +321,28 @@ public class CryptoManagerGUI {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                drawPriceChart(g, prices, symbol);
+                // Pass this panel's dimensions to drawPriceChart
+                drawPriceChart(g, prices, symbol, getWidth(), getHeight());
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                // Make it responsive to parent container
+                Dimension parentSize = getParent() != null ? getParent().getSize() : new Dimension(780, 150);
+                return new Dimension(parentSize.width, Math.max(150, parentSize.height / 4));
             }
         };
 
-        chartPanel.setPreferredSize(new Dimension(780, 150));
         return chartPanel;
     }
 
-    private void drawPriceChart(Graphics g, List<Double> prices, String symbol) {
+    private void drawPriceChart(Graphics g, List<Double> prices, String symbol, int width, int height) {
         if (prices.size() < 2) return;
 
-        int width = 780;
-        int height = 150;
+        // Ensure minimum dimensions
+        if (width < 100) width = 780;
+        if (height < 100) height = 150;
+
         int padding = 20;
 
         // Find min and max prices for scaling
@@ -359,39 +382,64 @@ public class CryptoManagerGUI {
     }
 
     private JPanel createMarketPricesPanel() {
-        JPanel marketPanel = new JPanel();
-        marketPanel.setLayout(new BoxLayout(marketPanel, BoxLayout.Y_AXIS));
+        JPanel marketPanel = new JPanel(new BorderLayout());
         marketPanel.setBorder(BorderFactory.createTitledBorder("Market Prices"));
-        marketPanel.setPreferredSize(new Dimension(250, 300));
+
+        // Create a container panel with GridBagLayout
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0; // Expand horizontally
+        gbc.gridx = 0;
+        gbc.gridwidth = GridBagConstraints.REMAINDER; // Take full width
 
         // Get current market prices
         Map<String, Double> marketPrices = MarketManager.getAllPrices();
 
         if (marketPrices.isEmpty()) {
-            JLabel emptyLabel = new JLabel("No market data available");
+            JLabel emptyLabel = new JLabel("No market data available", JLabel.CENTER);
             emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            marketPanel.add(emptyLabel);
+            contentPanel.add(emptyLabel, gbc);
         } else {
+            int row = 0;
             for (Map.Entry<String, Double> entry : marketPrices.entrySet()) {
-                marketPanel.add(createMarketPricePanel(entry.getKey(), entry.getValue()));
+                gbc.gridy = row++;
+                JPanel pricePanel = createMarketPricePanel(entry.getKey(), entry.getValue());
+                contentPanel.add(pricePanel, gbc);
+
+                // Add vertical spacing
+                gbc.gridy = row++;
+                gbc.weighty = 0.0;
+                contentPanel.add(Box.createVerticalStrut(5), gbc);
             }
         }
 
-        // Add refresh button at the bottom
-        JButton refreshButton = new JButton("Refresh Prices");
-        refreshButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        refreshButton.addActionListener(e -> handleMarket());
+        // Add glue to push everything up
+        gbc.gridy++;
+        gbc.weighty = 1.0; // Push components up
+        contentPanel.add(Box.createVerticalGlue(), gbc);
 
-        marketPanel.add(Box.createVerticalStrut(10)); // Add some space
-        marketPanel.add(refreshButton);
+        // Add to scroll pane
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        // Add refresh button at the bottom
+        JPanel bottomPanel = new JPanel();
+        JButton refreshButton = new JButton("Refresh Prices");
+        refreshButton.addActionListener(e -> handleMarket());
+        bottomPanel.add(refreshButton);
+
+        marketPanel.add(scrollPane, BorderLayout.CENTER);
+        marketPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         return marketPanel;
     }
 
     private JPanel createMarketPricePanel(String symbol, double price) {
+        // Create a panel that will fill width
         JPanel pricePanel = new JPanel(new BorderLayout());
         pricePanel.setBorder(BorderFactory.createEtchedBorder());
-        pricePanel.setMaximumSize(new Dimension(230, 40));
         pricePanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         String assetName = MarketManager.getCryptoName(symbol);
@@ -400,18 +448,17 @@ public class CryptoManagerGUI {
 
         priceLabel.setFont(new Font("Arial", Font.BOLD, 12));
 
-        // Make labels non-opaque
-        symbolLabel.setOpaque(false);
-        priceLabel.setOpaque(false);
+        // Add padding
+        symbolLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        priceLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         pricePanel.add(symbolLabel, BorderLayout.WEST);
         pricePanel.add(priceLabel, BorderLayout.EAST);
 
-        // Create a mouse listener for all components
+        // Create a mouse listener
         MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // Change the chart instead of buying
                 changeChart(symbol);
             }
 
@@ -433,20 +480,19 @@ public class CryptoManagerGUI {
 
         return pricePanel;
     }
-
     private void changeChart(String symbol) {
         currentChartSymbol = symbol;
 
-        // Update the existing chart container
         chartContainer.removeAll();
 
-        // Recreate chart content
         List<Double> priceHistory = MarketManager.getPriceHistory(symbol);
 
         if (priceHistory.isEmpty()) {
             chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
         } else {
-            chartContainer.add(createSimpleChart(priceHistory, symbol), BorderLayout.CENTER);
+            // Create a panel that will expand
+            JPanel chartPanel = createSimpleChart(priceHistory, symbol);
+            chartContainer.add(chartPanel, BorderLayout.CENTER);
         }
 
         // Update buy button
@@ -749,7 +795,6 @@ public class CryptoManagerGUI {
 
         // Create scroll pane - disable horizontal scrolling
         JScrollPane scrollPane = new JScrollPane(assetsListPanel);
-        scrollPane.setPreferredSize(new Dimension(500, 300));
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Disable horizontal scroll
 
@@ -1313,6 +1358,18 @@ public class CryptoManagerGUI {
         sellDialog.setVisible(true);
 
         return result[0];
+    }
+    private void setupResizeListener() {
+        mainFrame.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                // Force repaint of chart when window is resized
+                if (chartContainer != null) {
+                    chartContainer.revalidate();
+                    chartContainer.repaint();
+                }
+            }
+        });
     }
 
     public void show() {
