@@ -4,6 +4,7 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Collections;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,6 +21,12 @@ public class CryptoManagerGUI {
     // Panel constants
     private static final String LANDING_PANEL = "LANDING";
     private static final String PORTFOLIO_PANEL = "PORTFOLIO";
+
+    // Add instance variable
+    private JPanel chartPanel;
+
+    private JPanel chartContainer;
+    private String currentChartSymbol = "BTC";
 
     public CryptoManagerGUI() {
         this.cryptoManager = new CryptoManager();
@@ -240,20 +247,115 @@ public class CryptoManagerGUI {
 
         return result[0];
     }
-    private JPanel createPortfolioPanel() {
-        JPanel portfolioPanel = new JPanel(new BorderLayout(10, 10));
-        portfolioPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+    private JPanel createPortfolioContent() {
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
 
-        // Header with user info and logout
-        portfolioPanel.add(createPortfolioHeader(), BorderLayout.NORTH);
+        // Chart panel at the top
+        chartPanel = createChartPanel(); // Default to Bitcoin
+        contentPanel.add(chartPanel, BorderLayout.NORTH);
 
-        // Main content - portfolio summary and assets
-        portfolioPanel.add(createPortfolioContent(), BorderLayout.CENTER);
+        // Main content area - split between assets and market prices
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane.setLeftComponent(createAssetsPanel());
+        splitPane.setRightComponent(createMarketPricesPanel());
+        splitPane.setDividerLocation(500);
 
-        // Action buttons at bottom
-        portfolioPanel.add(createActionButtons(), BorderLayout.SOUTH);
+        contentPanel.add(splitPane, BorderLayout.CENTER);
 
-        return portfolioPanel;
+        return contentPanel;
+    }
+
+    private JPanel createChartPanel() {
+        chartContainer = new JPanel(new BorderLayout());
+        updateChartContent(); // Initialize with current symbol
+        return chartContainer;
+    }
+
+    private void updateChartContent() {
+        chartContainer.removeAll();
+
+        String symbol = currentChartSymbol;
+        List<Double> priceHistory = MarketManager.getPriceHistory(symbol);
+
+        if (priceHistory.isEmpty()) {
+            chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
+        } else {
+            chartContainer.add(createSimpleChart(priceHistory, symbol), BorderLayout.CENTER);
+        }
+
+        // Buy button
+        JButton buyButton = new JButton("Buy " + symbol);
+        buyButton.addActionListener(e -> {
+            double currentPrice = MarketManager.getCurrentPrice(symbol);
+            handleBuy(symbol, currentPrice);
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(buyButton);
+        chartContainer.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Update title
+        chartContainer.setBorder(BorderFactory.createTitledBorder(
+                MarketManager.getCryptoName(symbol) + " (" + symbol + ") Price Chart"));
+
+        chartContainer.revalidate();
+        chartContainer.repaint();
+    }
+
+    private JPanel createSimpleChart(List<Double> prices, String symbol) {
+        JPanel chartPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                drawPriceChart(g, prices, symbol);
+            }
+        };
+
+        chartPanel.setPreferredSize(new Dimension(780, 150));
+        return chartPanel;
+    }
+
+    private void drawPriceChart(Graphics g, List<Double> prices, String symbol) {
+        if (prices.size() < 2) return;
+
+        int width = 780;
+        int height = 150;
+        int padding = 20;
+
+        // Find min and max prices for scaling
+        double minPrice = Collections.min(prices);
+        double maxPrice = Collections.max(prices);
+        double priceRange = maxPrice - minPrice;
+
+        // Draw grid
+        g.setColor(Color.LIGHT_GRAY);
+        for (int i = 0; i <= 4; i++) {
+            int y = padding + (int)((height - 2 * padding) * (1 - (double)i / 4));
+            g.drawLine(padding, y, width - padding, y);
+
+            // Price labels
+            double price = minPrice + (priceRange * i / 4);
+            g.drawString(String.format("$%,.0f", price), 5, y + 4);
+        }
+
+        // Draw price line
+        g.setColor(Color.BLUE);
+        for (int i = 1; i < prices.size(); i++) {
+            int x1 = padding + (int)((width - 2 * padding) * ((double)(i - 1) / (prices.size() - 1)));
+            int y1 = padding + (int)((height - 2 * padding) * (1 - (prices.get(i - 1) - minPrice) / priceRange));
+
+            int x2 = padding + (int)((width - 2 * padding) * ((double)i / (prices.size() - 1)));
+            int y2 = padding + (int)((height - 2 * padding) * (1 - (prices.get(i) - minPrice) / priceRange));
+
+            g.drawLine(x1, y1, x2, y2);
+        }
+
+        // Draw current price
+        double currentPrice = prices.get(prices.size() - 1);
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 12));
+        g.drawString("Current: $" + String.format("%,.2f", currentPrice),
+                width - 150, padding + 15);
     }
 
     private JPanel createMarketPricesPanel() {
@@ -292,7 +394,7 @@ public class CryptoManagerGUI {
         pricePanel.setMaximumSize(new Dimension(230, 40));
         pricePanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        String assetName = cryptoManager.getAssetName(symbol);
+        String assetName = MarketManager.getCryptoName(symbol);
         JLabel symbolLabel = new JLabel(assetName + " (" + symbol + ")");
         JLabel priceLabel = new JLabel("$" + String.format("%,.2f", price));
 
@@ -309,12 +411,13 @@ public class CryptoManagerGUI {
         MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                handleBuy(symbol, price);
+                // Change the chart instead of buying
+                changeChart(symbol);
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                pricePanel.setBackground(new Color(200, 200, 200)); // Darker gray
+                pricePanel.setBackground(new Color(200, 200, 200));
             }
 
             @Override
@@ -331,6 +434,40 @@ public class CryptoManagerGUI {
         return pricePanel;
     }
 
+    private void changeChart(String symbol) {
+        currentChartSymbol = symbol;
+
+        // Update the existing chart container
+        chartContainer.removeAll();
+
+        // Recreate chart content
+        List<Double> priceHistory = MarketManager.getPriceHistory(symbol);
+
+        if (priceHistory.isEmpty()) {
+            chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
+        } else {
+            chartContainer.add(createSimpleChart(priceHistory, symbol), BorderLayout.CENTER);
+        }
+
+        // Update buy button
+        JButton buyButton = new JButton("Buy " + symbol);
+        buyButton.addActionListener(e -> {
+            double currentPrice = MarketManager.getCurrentPrice(symbol);
+            handleBuy(symbol, currentPrice);
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(buyButton);
+        chartContainer.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Update title
+        chartContainer.setBorder(BorderFactory.createTitledBorder(
+                MarketManager.getCryptoName(symbol) + " (" + symbol + ") Price Chart"));
+
+        chartContainer.revalidate();
+        chartContainer.repaint();
+    }
+
     private JPanel createPortfolioHeader() {
         JPanel headerPanel = new JPanel(new BorderLayout());
 
@@ -344,23 +481,6 @@ public class CryptoManagerGUI {
         headerPanel.add(logoutButton, BorderLayout.EAST);
 
         return headerPanel;
-    }
-
-    private JPanel createPortfolioContent() {
-        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
-
-        // Portfolio summary
-        contentPanel.add(createSummaryPanel(), BorderLayout.NORTH);
-
-        // Main content area - split between assets and market prices
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setLeftComponent(createAssetsPanel());
-        splitPane.setRightComponent(createMarketPricesPanel());
-        splitPane.setDividerLocation(500); // Adjust based on your preference
-
-        contentPanel.add(splitPane, BorderLayout.CENTER);
-
-        return contentPanel;
     }
 
     private JPanel createSummaryPanel() {
@@ -825,6 +945,23 @@ public class CryptoManagerGUI {
 
         // No refresh needed - panel is created fresh with latest data
     }
+
+    private JPanel createPortfolioPanel() {
+        JPanel portfolioPanel = new JPanel(new BorderLayout(10, 10));
+        portfolioPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Header with user info and logout
+        portfolioPanel.add(createPortfolioHeader(), BorderLayout.NORTH);
+
+        // Main content - portfolio summary and assets
+        portfolioPanel.add(createPortfolioContent(), BorderLayout.CENTER);
+
+        // Action buttons at bottom
+        portfolioPanel.add(createActionButtons(), BorderLayout.SOUTH);
+
+        return portfolioPanel;
+    }
+
     public static double showWithdrawGUI(double currentBalance) {
         JDialog withdrawDialog = new JDialog((JFrame)null, "Withdraw Funds", true);
         withdrawDialog.setSize(300, 200);
