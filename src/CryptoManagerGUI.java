@@ -295,7 +295,16 @@ public class CryptoManagerGUI {
         if (priceHistory.isEmpty()) {
             chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
         } else {
-            chartContainer.add(createSimpleChart(priceHistory, symbol), BorderLayout.CENTER);
+            // Create the chart panel
+            JPanel chartPanel = createSimpleChart(priceHistory, symbol);
+
+            // Wrap it in a scroll pane with horizontal scrolling
+            JScrollPane scrollPane = new JScrollPane(chartPanel);
+            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            scrollPane.getHorizontalScrollBar().setUnitIncrement(20); // Smooth scrolling
+
+            chartContainer.add(scrollPane, BorderLayout.CENTER);
         }
 
         // Buy button
@@ -316,7 +325,9 @@ public class CryptoManagerGUI {
         chartContainer.repaint();
     }
 
+
     private JPanel createSimpleChart(List<Double> prices, String symbol) {
+        // Create a chart panel that's wider than the viewport
         JPanel chartPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -327,9 +338,11 @@ public class CryptoManagerGUI {
 
             @Override
             public Dimension getPreferredSize() {
-                // Make it responsive to parent container
-                Dimension parentSize = getParent() != null ? getParent().getSize() : new Dimension(780, 150);
-                return new Dimension(parentSize.width, Math.max(150, parentSize.height / 4));
+                // Make width proportional to number of data points
+                int dataPoints = prices.size();
+                int width = Math.max(800, dataPoints * 10); // At least 800px, or 10px per data point
+                int height = Math.max(150, getParent() != null ? getParent().getHeight() / 3 : 150);
+                return new Dimension(width, height);
             }
         };
 
@@ -339,30 +352,56 @@ public class CryptoManagerGUI {
     private void drawPriceChart(Graphics g, List<Double> prices, String symbol, int width, int height) {
         if (prices.size() < 2) return;
 
-        // Ensure minimum dimensions
-        if (width < 100) width = 780;
-        if (height < 100) height = 150;
+        // Use the full width of the chart panel (not the viewport)
+        // This ensures all data points are visible when scrolling
 
-        int padding = 20;
+        int padding = 30; // Increased padding for better labels
 
         // Find min and max prices for scaling
         double minPrice = Collections.min(prices);
         double maxPrice = Collections.max(prices);
         double priceRange = maxPrice - minPrice;
 
-        // Draw grid
+        // Set background
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, width, height);
+
+        // Draw grid lines and labels
         g.setColor(Color.LIGHT_GRAY);
         for (int i = 0; i <= 4; i++) {
             int y = padding + (int)((height - 2 * padding) * (1 - (double)i / 4));
             g.drawLine(padding, y, width - padding, y);
 
-            // Price labels
+            // Price labels on left
             double price = minPrice + (priceRange * i / 4);
+            g.setColor(Color.BLACK);
             g.drawString(String.format("$%,.0f", price), 5, y + 4);
+            g.setColor(Color.LIGHT_GRAY);
         }
 
-        // Draw price line
-        g.setColor(Color.BLUE);
+        // Draw time markers on bottom (if we have enough data)
+        if (prices.size() > 10) {
+            g.setColor(Color.GRAY);
+            int timeMarkers = Math.min(10, prices.size() - 1);
+            for (int i = 0; i <= timeMarkers; i++) {
+                int x = padding + (int)((width - 2 * padding) * ((double)i / timeMarkers));
+                g.drawLine(x, height - padding, x, height - padding + 5);
+
+                // Label every other marker to avoid clutter
+                if (i % 2 == 0) {
+                    g.setColor(Color.BLACK);
+                    g.drawString("T-" + (timeMarkers - i), x - 10, height - padding + 20);
+                    g.setColor(Color.GRAY);
+                }
+            }
+        }
+
+        // Draw price line with anti-aliasing for smoother lines
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setColor(Color.BLUE);
+        g2d.setStroke(new BasicStroke(2.0f)); // Thicker line
+
         for (int i = 1; i < prices.size(); i++) {
             int x1 = padding + (int)((width - 2 * padding) * ((double)(i - 1) / (prices.size() - 1)));
             int y1 = padding + (int)((height - 2 * padding) * (1 - (prices.get(i - 1) - minPrice) / priceRange));
@@ -370,15 +409,37 @@ public class CryptoManagerGUI {
             int x2 = padding + (int)((width - 2 * padding) * ((double)i / (prices.size() - 1)));
             int y2 = padding + (int)((height - 2 * padding) * (1 - (prices.get(i) - minPrice) / priceRange));
 
-            g.drawLine(x1, y1, x2, y2);
+            g2d.drawLine(x1, y1, x2, y2);
+
+            // Draw data points for significant changes
+            if (i % (prices.size() / 20) == 0 || i == prices.size() - 1) {
+                g2d.setColor(Color.RED);
+                g2d.fillOval(x2 - 3, y2 - 3, 6, 6);
+                g2d.setColor(Color.BLUE);
+            }
         }
 
-        // Draw current price
+        // Draw current price info
         double currentPrice = prices.get(prices.size() - 1);
         g.setColor(Color.BLACK);
-        g.setFont(new Font("Arial", Font.BOLD, 12));
-        g.drawString("Current: $" + String.format("%,.2f", currentPrice),
-                width - 150, padding + 15);
+        g.setFont(new Font("Arial", Font.BOLD, 14));
+        g.drawString("Current Price: $" + String.format("%,.2f", currentPrice),
+                width - 200, padding + 15);
+
+        // Draw min/max labels
+        g.setFont(new Font("Arial", Font.PLAIN, 10));
+        g.drawString("High: $" + String.format("%,.0f", maxPrice), width - 200, padding + 35);
+        g.drawString("Low: $" + String.format("%,.0f", minPrice), width - 200, padding + 50);
+
+        // Draw price change if we have enough data
+        if (prices.size() > 1) {
+            double firstPrice = prices.get(0);
+            double priceChange = ((currentPrice - firstPrice) / firstPrice) * 100;
+            Color changeColor = priceChange >= 0 ? Color.GREEN : Color.RED;
+            g.setColor(changeColor);
+            g.setFont(new Font("Arial", Font.BOLD, 12));
+            g.drawString(String.format("%+.2f%%", priceChange), width - 200, padding + 70);
+        }
     }
 
     private JPanel createMarketPricesPanel() {
