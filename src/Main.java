@@ -1,6 +1,6 @@
 public class Main {
     public static void main(String[] args) {
-        CryptoManager app = new CryptoManager();
+        CryptoManager app = CryptoManager.getInstance();
         app.start();
     }
 }

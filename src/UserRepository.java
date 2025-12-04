@@ -2,11 +2,12 @@ import java.io.*;
 import java.util.*;
 
 public class UserRepository {
-    private static final String DATA_DIR = "data/users/";
-    private static final String AUTH_FILE = "data/auth.csv";
+    private static UserRepository instance;
+    private final String DATA_DIR = "data/users/";
+    private final String AUTH_FILE = "data/auth.csv";
 
-    // Static initializer to set up directories
-    static {
+    // Private constructor to prevent instantiation
+    private UserRepository() {
         new File(DATA_DIR).mkdirs();
         try {
             new File(AUTH_FILE).createNewFile();
@@ -15,10 +16,7 @@ public class UserRepository {
         }
     }
 
-    // Private constructor to prevent instantiation
-    private UserRepository() {}
-
-    public static boolean saveUserData(User user, String password) {
+    public boolean saveUserData(User user, String password) {
         // If password is provided, also save to auth file (for new users)
         if (password != null && !password.isEmpty()) {
             if (!saveUserToAuthFile(user.getUsername(), password)) {
@@ -31,7 +29,7 @@ public class UserRepository {
     }
 
     // Private method for actual file writing
-    private static boolean saveUserToFile(User user) {
+    private boolean saveUserToFile(User user) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(getUserFilePath(user.getUsername())))) {
             // First line: balance,realized_profit
             writer.write(user.getBalance() + "," + user.getRealizedProfit());
@@ -50,7 +48,7 @@ public class UserRepository {
         }
     }
 
-    private static boolean saveUserToAuthFile(String username, String password) {
+    private boolean saveUserToAuthFile(String username, String password) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(AUTH_FILE, true))) {
             writer.write(username + "," + password);
             writer.newLine();
@@ -61,7 +59,7 @@ public class UserRepository {
         }
     }
 
-    public static User loadUser(String username) {
+    public User loadUser(String username) {
         File userFile = new File(getUserFilePath(username));
         if (!userFile.exists()) {
             return null;
@@ -95,7 +93,7 @@ public class UserRepository {
         return null;
     }
 
-    private static Asset parseAssetLine(String line) {
+    private Asset parseAssetLine(String line) {
         try {
             String[] parts = line.split(",");
             if (parts.length >= 4) { // Changed from 5 to 4 (removed timestamp)
@@ -120,25 +118,25 @@ public class UserRepository {
         return null;
     }
 
-    private static String assetToCsvLine(Asset asset) {
+    private String assetToCsvLine(Asset asset) {
         String type = getAssetType(asset);
         // Removed timestamp from CSV line
         return String.format("%s,%s,%.2f,%.6f",
                 type, asset.getSymbol(), asset.getBuyPrice(), asset.getAmount());
     }
 
-    private static String getAssetType(Asset asset) {
+    private String getAssetType(Asset asset) {
         if (asset instanceof Bitcoin) return "bitcoin";
         if (asset instanceof Ethereum) return "ethereum";
         if (asset instanceof Solana) return "solana";
         return "unknown";
     }
 
-    public static boolean userExists(String username) {
+    public boolean userExists(String username) {
         return userExistsInAuthFile(username);
     }
 
-    private static boolean userExistsInAuthFile(String username) {
+    private boolean userExistsInAuthFile(String username) {
         try (BufferedReader reader = new BufferedReader(new FileReader(AUTH_FILE))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -153,7 +151,7 @@ public class UserRepository {
         return false;
     }
 
-    public static boolean validateCredentials(String username, String password) {
+    public boolean validateCredentials(String username, String password) {
         try (BufferedReader reader = new BufferedReader(new FileReader(AUTH_FILE))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -167,8 +165,14 @@ public class UserRepository {
         }
         return false;
     }
+    public static UserRepository getInstance() {
+        if(instance == null) {
+            instance = new UserRepository();
+        }
+        return instance;
+    }
 
-    private static String getUserFilePath(String username) {
+    private String getUserFilePath(String username) {
         return DATA_DIR + username + ".csv";
     }
 }

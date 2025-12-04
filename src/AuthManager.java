@@ -2,34 +2,46 @@ import java.util.Scanner;
 
 public class AuthManager {
     private static User currentUser;
-    private static Scanner scanner = new Scanner(System.in);
+    private static AuthManager instance;
+    private CryptoManagerGUI cryptoManagerGUI;
+    private UserRepository userRepository = UserRepository.getInstance();
+    private Scanner scanner = new Scanner(System.in);
 
     // Private constructor to prevent instantiation
-    private AuthManager() {}
-
-    public static User login() {
-        return CryptoManagerGUI.showLoginGUI();
+    private AuthManager() {
+        cryptoManagerGUI = CryptoManagerGUI.getInstance();
     }
 
-    public static boolean createAccount() {
-        return CryptoManagerGUI.showCreateAccountGUI();
+    public User login() {
+        return cryptoManagerGUI.showLoginGUI();
+    }
+
+    public boolean createAccount() {
+        return cryptoManagerGUI.showCreateAccountGUI();
     }
 
     // In AuthManager.logout()
-    public static void logout() {
+    public void logout() {
         if (currentUser != null) {
-            UserRepository.saveUserData(currentUser, null);
+            userRepository.saveUserData(currentUser, null);
             Sorter.resetToDefault();  // Reset sorting for next user
             System.out.println("Balance saved successfully.");
         }
         currentUser = null;
     }
 
-    public static User getCurrentUser() {
+    public static AuthManager getInstance() {
+        if(instance == null) {
+            instance = new AuthManager();
+        }
+        return instance;
+    }
+
+    public User getCurrentUser() {
         return currentUser;
     }
 
-    public static boolean isLoggedIn() {
+    public boolean isLoggedIn() {
         return currentUser != null;
     }
 }

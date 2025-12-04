@@ -4,13 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="added the run portfolio gui">
+    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="bugs and confirm password added">
+      <change afterPath="$PROJECT_DIR$/src/AssetFactory.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/auth.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/auth.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/market_prices.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/market_prices.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/users/hello.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/users/john2.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/users/john.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/users/john.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/users/john1.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/users/john2.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AuthManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AuthManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CryptoManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CryptoManagerGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManagerGUI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/UserRepository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,7 +36,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="gui" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -153,7 +159,14 @@
       <option name="project" value="LOCAL" />
       <updated>1764675389083</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="bugs and confirm password added">
+      <created>1764809169263</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1764809169263</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -178,6 +191,8 @@
     <MESSAGE value="gui functionality done!" />
     <MESSAGE value="graph done" />
     <MESSAGE value="responsive" />
-    <option name="LAST_COMMIT_MESSAGE" value="responsive" />
+    <MESSAGE value="check market prices gui added" />
+    <MESSAGE value="bugs and confirm password added" />
+    <option name="LAST_COMMIT_MESSAGE" value="bugs and confirm password added" />
   </component>
 </project>

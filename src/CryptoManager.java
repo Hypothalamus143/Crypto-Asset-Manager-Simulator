@@ -8,9 +8,16 @@ import java.util.Comparator;
 public class CryptoManager {
     private User currentUser;
     private Scanner scanner;
-
-    public CryptoManager() {
+    private static CryptoManager instance;
+    private AuthManager authManager;
+    private UserRepository userRepository;
+    private AssetFactory assetFactory;
+    private CryptoManagerGUI cryptoManagerGUI;
+    private CryptoManager() {
         this.scanner = new Scanner(System.in);
+        assetFactory = AssetFactory.getInstance();
+        userRepository = UserRepository.getInstance();
+        cryptoManagerGUI = CryptoManagerGUI.getInstance();
     }
 
     public void start() {
@@ -18,7 +25,7 @@ public class CryptoManager {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new CryptoManagerGUI().show();
+                cryptoManagerGUI.show();
             }
         });
     }
@@ -145,7 +152,7 @@ public class CryptoManager {
 
     private void executePurchase(String symbol, double buyPrice, double amount, double totalCost) {
         // Create the asset
-        Asset newAsset = createAsset(symbol, buyPrice, amount);
+        Asset newAsset = assetFactory.createAsset(symbol, buyPrice, amount);
 
         if (newAsset != null) {
             // Update user's balance and assets
@@ -159,22 +166,9 @@ public class CryptoManager {
             System.out.printf("Bought %.6f %s at $%,.2f each\n", amount, symbol, buyPrice);
             System.out.printf("Total cost: $%,.2f\n", totalCost);
             System.out.printf("New balance: $%,.2f\n", currentUser.getBalance());
-            UserRepository.saveUserData(currentUser, null);
+            userRepository.saveUserData(currentUser, null);
         } else {
             System.out.println("Error: Could not create asset.");
-        }
-    }
-
-    private Asset createAsset(String symbol, double buyPrice, double amount) {
-        switch (symbol.toUpperCase()) {
-            case "BTC":
-                return new Bitcoin(buyPrice, amount);
-            case "ETH":
-                return new Ethereum(buyPrice, amount);
-            case "SOL":
-                return new Solana(buyPrice, amount);
-            default:
-                return null;
         }
     }
 
@@ -236,7 +230,7 @@ public class CryptoManager {
         System.out.printf("Received: $%,.2f\n", totalValue);
         System.out.printf("Realized Profit: $%,.2f\n", realizedProfit);
         System.out.printf("New balance: $%,.2f\n", currentUser.getBalance());
-        UserRepository.saveUserData(currentUser, null);
+        userRepository.saveUserData(currentUser, null);
     }
 
     void checkMarket() {
@@ -273,7 +267,7 @@ public class CryptoManager {
             System.out.printf("Successfully deposited $%.2f\n", amount);
             System.out.printf("Old balance: $%.2f\n", oldBalance);
             System.out.printf("New balance: $%.2f\n", newBalance);
-            UserRepository.saveUserData(currentUser, null);
+            userRepository.saveUserData(currentUser, null);
 
             JOptionPane.showMessageDialog(null,
                     String.format("Deposited $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
@@ -294,13 +288,29 @@ public class CryptoManager {
             System.out.printf("Successfully withdrew $%.2f\n", amount);
             System.out.printf("Old balance: $%.2f\n", oldBalance);
             System.out.printf("New balance: $%.2f\n", newBalance);
-            UserRepository.saveUserData(currentUser, null);
+            userRepository.saveUserData(currentUser, null);
 
             JOptionPane.showMessageDialog(null,
                     String.format("Withdrew $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
                     "Withdrawal Successful",
                     JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+    public UserRepository getUserRepository(){
+        return userRepository;
+    }
+    public AuthManager getAuthManager(){
+        return authManager;
+    }
+    public CryptoManagerGUI getCryptoManagerGUI() {
+        return cryptoManagerGUI;
+    }
+
+    public static CryptoManager getInstance() {
+        if(instance == null) {
+            instance = new CryptoManager();
+        }
+        return instance;
     }
 
     public void setCurrentUser(User user) {

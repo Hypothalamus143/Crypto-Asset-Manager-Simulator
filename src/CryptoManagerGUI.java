@@ -11,6 +11,9 @@ import java.awt.event.ActionListener;
 import java.util.Map;
 
 public class CryptoManagerGUI {
+    private static CryptoManagerGUI instance;
+    private UserRepository userRepository;
+    private AuthManager authManager;
     private JFrame mainFrame;
     private CardLayout cardLayout;
     private JPanel mainPanel;
@@ -19,8 +22,8 @@ public class CryptoManagerGUI {
     private String currentSortDirection = "Ascending";
 
     // Panel constants
-    private static final String LANDING_PANEL = "LANDING";
-    private static final String PORTFOLIO_PANEL = "PORTFOLIO";
+    private final String LANDING_PANEL = "LANDING";
+    private final String PORTFOLIO_PANEL = "PORTFOLIO";
 
     // Add instance variable
     private JPanel chartPanel;
@@ -29,7 +32,9 @@ public class CryptoManagerGUI {
     private String currentChartSymbol = "BTC";
 
     public CryptoManagerGUI() {
-        this.cryptoManager = new CryptoManager();
+        this.cryptoManager = cryptoManager.getInstance();
+        this.userRepository = cryptoManager.getUserRepository();
+        this.authManager = AuthManager.getInstance();
         initializeGUI();
     }
 
@@ -54,7 +59,7 @@ public class CryptoManagerGUI {
     }
 
     private void handleLogin() {
-        User user = AuthManager.login();
+        User user = authManager.login();
         if (user != null) {
             cryptoManager.setCurrentUser(user);
             showPortfolioPanel(user); // Switch to portfolio panel
@@ -64,7 +69,7 @@ public class CryptoManagerGUI {
 
     private void handleCreateAccount() {
         // Call the AuthManager.createAccount() method directly
-        boolean success = AuthManager.createAccount();
+        boolean success = authManager.createAccount();
         if (success) {
             JOptionPane.showMessageDialog(mainFrame,
                     "Account created successfully! Please login.",
@@ -96,7 +101,7 @@ public class CryptoManagerGUI {
         loginButton.setFont(new Font("Arial", Font.PLAIN, 16));
         loginButton.addActionListener(e -> handleLogin());
 
-        // Create Create Account button
+        // Create Account button
         JButton createAccountButton = new JButton("Create Account");
         createAccountButton.setFont(new Font("Arial", Font.PLAIN, 16));
         createAccountButton.addActionListener(e -> handleCreateAccount());
@@ -110,7 +115,7 @@ public class CryptoManagerGUI {
     }
 
 
-    public static User showLoginGUI() {
+    public User showLoginGUI() {
         JDialog loginDialog = new JDialog((JFrame)null, "Login", true); // Modal dialog
         loginDialog.setSize(300, 200);
         loginDialog.setLocationRelativeTo(null);
@@ -145,8 +150,8 @@ public class CryptoManagerGUI {
                 return;
             }
 
-            if (UserRepository.validateCredentials(username, password)) {
-                User user = UserRepository.loadUser(username);
+            if (userRepository.validateCredentials(username, password)) {
+                User user = userRepository.loadUser(username);
                 if (user != null) {
                     result[0] = user;
                     loginDialog.dispose();
@@ -172,7 +177,7 @@ public class CryptoManagerGUI {
         return result[0];
     }
 
-    public static boolean showCreateAccountGUI() {
+    public boolean showCreateAccountGUI() {
         JDialog createAccDialog = new JDialog((JFrame)null, "Create Account", true);
         createAccDialog.setSize(400, 280);
         createAccDialog.setLocationRelativeTo(null);
@@ -353,7 +358,7 @@ public class CryptoManagerGUI {
                 return;
             }
 
-            if (UserRepository.userExists(username)) {
+            if (userRepository.userExists(username)) {
                 JOptionPane.showMessageDialog(createAccDialog,
                         "Username already exists",
                         "Error",
@@ -363,7 +368,7 @@ public class CryptoManagerGUI {
 
             // Create new user
             User newUser = new User(username);
-            boolean success = UserRepository.saveUserData(newUser, password);
+            boolean success = userRepository.saveUserData(newUser, password);
 
             if (success) {
                 result[0] = true;
@@ -1124,7 +1129,7 @@ public class CryptoManagerGUI {
     }
 
     private void handleLogout() {
-        AuthManager.logout();
+        authManager.logout();
         cryptoManager.setCurrentUser(null);
         showLandingPanel();
     }
@@ -1578,6 +1583,12 @@ public class CryptoManagerGUI {
         });
     }
 
+    public static CryptoManagerGUI getInstance() {
+        if(instance == null) {
+            instance = new CryptoManagerGUI();
+        }
+        return instance;
+    }
     public void show() {
         mainFrame.setVisible(true);
     }
