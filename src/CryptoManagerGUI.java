@@ -63,9 +63,6 @@ public class CryptoManagerGUI {
 
 
     private void handleCreateAccount() {
-        // Hide the GUI and run terminal account creation
-        mainFrame.setVisible(false);
-
         // Call the AuthManager.createAccount() method directly
         boolean success = AuthManager.createAccount();
         if (success) {
@@ -177,51 +174,190 @@ public class CryptoManagerGUI {
 
     public static boolean showCreateAccountGUI() {
         JDialog createAccDialog = new JDialog((JFrame)null, "Create Account", true);
-        createAccDialog.setSize(350, 200);
+        createAccDialog.setSize(400, 280);
         createAccDialog.setLocationRelativeTo(null);
         createAccDialog.setResizable(false);
 
-        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        // Main panel with BorderLayout
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
+        // Create form panel with GridBagLayout
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Fixed width labels
         JLabel userLabel = new JLabel("Username:");
-        JTextField userField = new JTextField();
         JLabel passLabel = new JLabel("Password:");
-        JPasswordField passField = new JPasswordField();
+        JLabel confirmLabel = new JLabel("Confirm Password:");
 
+        // Set preferred size for labels to prevent width changes
+        Dimension labelSize = new Dimension(120, 25);
+        userLabel.setPreferredSize(labelSize);
+        passLabel.setPreferredSize(labelSize);
+        confirmLabel.setPreferredSize(labelSize);
+
+        JTextField userField = new JTextField(15);
+        JPasswordField passField = new JPasswordField(15);
+        JPasswordField confirmPassField = new JPasswordField(15);
+
+        // Row 0: Username
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0.0; // Labels don't expand
+        gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(userLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0; // Fields expand
+        gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(userField, gbc);
+
+        // Row 1: Password
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 0.0;
+        gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(passLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(passField, gbc);
+
+        // Row 2: Confirm Password
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.weightx = 0.0;
+        gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(confirmLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(confirmPassField, gbc);
+
+        // Row 3: Password match indicator (centered, spans 2 columns)
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(10, 5, 5, 5);
+
+        JLabel passwordMatchLabel = new JLabel("", JLabel.CENTER);
+        passwordMatchLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        passwordMatchLabel.setForeground(Color.GRAY);
+        // Fixed height to prevent layout shifts
+        passwordMatchLabel.setPreferredSize(new Dimension(0, 20));
+        formPanel.add(passwordMatchLabel, gbc);
+
+        // Add filler to push everything up
+        gbc.gridy = 4;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        formPanel.add(Box.createVerticalGlue(), gbc);
+
+        mainPanel.add(formPanel, BorderLayout.CENTER);
+
+        // Button panel at bottom
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         JButton createBtn = new JButton("Create Account");
         JButton cancelBtn = new JButton("Cancel");
+        buttonPanel.add(cancelBtn);
+        buttonPanel.add(createBtn);
 
-        panel.add(userLabel);
-        panel.add(userField);
-        panel.add(passLabel);
-        panel.add(passField);
-        panel.add(createBtn);
-        panel.add(cancelBtn);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        final boolean[] result = new boolean[1]; // Array to store result
+        final boolean[] result = new boolean[1];
+
+        // Real-time password matching indicator
+        DocumentListener passwordListener = new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                checkPasswords();
+            }
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                checkPasswords();
+            }
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                checkPasswords();
+            }
+
+            private void checkPasswords() {
+                String password = new String(passField.getPassword());
+                String confirmPassword = new String(confirmPassField.getPassword());
+
+                if (password.isEmpty() && confirmPassword.isEmpty()) {
+                    passwordMatchLabel.setText("");
+                    passwordMatchLabel.setForeground(Color.GRAY);
+                } else if (password.equals(confirmPassword)) {
+                    passwordMatchLabel.setText("✓ Passwords match");
+                    passwordMatchLabel.setForeground(new Color(0, 150, 0));
+                } else {
+                    passwordMatchLabel.setText("✗ Passwords do not match");
+                    passwordMatchLabel.setForeground(Color.RED);
+                }
+
+                // Force layout to stay stable
+                passwordMatchLabel.setPreferredSize(new Dimension(0, 20));
+                createAccDialog.pack();
+            }
+        };
+
+        passField.getDocument().addDocumentListener(passwordListener);
+        confirmPassField.getDocument().addDocumentListener(passwordListener);
 
         createBtn.addActionListener(e -> {
             String username = userField.getText().trim();
             String password = new String(passField.getPassword()).trim();
+            String confirmPassword = new String(confirmPassField.getPassword()).trim();
 
-            if (username.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(createAccDialog, "Please fill all fields");
+            if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                JOptionPane.showMessageDialog(createAccDialog,
+                        "Please fill all fields",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             if (username.contains(",")) {
-                JOptionPane.showMessageDialog(createAccDialog, "Username cannot contain commas");
+                JOptionPane.showMessageDialog(createAccDialog,
+                        "Username cannot contain commas",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             if (password.contains(",")) {
-                JOptionPane.showMessageDialog(createAccDialog, "Password cannot contain commas");
+                JOptionPane.showMessageDialog(createAccDialog,
+                        "Password cannot contain commas",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!password.equals(confirmPassword)) {
+                JOptionPane.showMessageDialog(createAccDialog,
+                        "Passwords do not match",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                passField.setText("");
+                confirmPassField.setText("");
+                passField.requestFocus();
                 return;
             }
 
             if (UserRepository.userExists(username)) {
-                JOptionPane.showMessageDialog(createAccDialog, "Username already exists");
+                JOptionPane.showMessageDialog(createAccDialog,
+                        "Username already exists",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -233,7 +369,10 @@ public class CryptoManagerGUI {
                 result[0] = true;
                 createAccDialog.dispose();
             } else {
-                JOptionPane.showMessageDialog(createAccDialog, "Error creating account");
+                JOptionPane.showMessageDialog(createAccDialog,
+                        "Error creating account",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -242,11 +381,13 @@ public class CryptoManagerGUI {
         });
 
         // Enter key support
-        passField.addActionListener(e -> createBtn.doClick());
+        userField.addActionListener(e -> passField.requestFocus());
+        passField.addActionListener(e -> confirmPassField.requestFocus());
+        confirmPassField.addActionListener(e -> createBtn.doClick());
 
-        createAccDialog.add(panel);
+        createAccDialog.add(mainPanel);
         createAccDialog.pack();
-        createAccDialog.setVisible(true); // This blocks until dialog is disposed
+        createAccDialog.setVisible(true);
 
         return result[0];
     }
@@ -292,8 +433,12 @@ public class CryptoManagerGUI {
         String symbol = currentChartSymbol;
         List<Double> priceHistory = MarketManager.getPriceHistory(symbol);
 
-        if (priceHistory.isEmpty()) {
-            chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
+        if (priceHistory.isEmpty() || priceHistory.size() < 20) {
+            //chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
+            for(int i = 0; i < 20; i++) {
+                cryptoManager.checkMarket();
+            }
+            showPortfolioPanel(cryptoManager.getCurrentUser());
         } else {
             // Create the chart panel
             JPanel chartPanel = createSimpleChart(priceHistory, symbol);
@@ -412,7 +557,7 @@ public class CryptoManagerGUI {
             g2d.drawLine(x1, y1, x2, y2);
 
             // Draw data points for significant changes
-            if (i % (prices.size() / 20) == 0 || i == prices.size() - 1) {
+            if (prices.size() > 20 && i % (prices.size() / 20) == 0 || i == prices.size() - 1) {
                 g2d.setColor(Color.RED);
                 g2d.fillOval(x2 - 3, y2 - 3, 6, 6);
                 g2d.setColor(Color.BLUE);

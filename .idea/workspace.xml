@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="responsive">
+    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="added the run portfolio gui">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/auth.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/auth.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/market_prices.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/market_prices.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/users/hello.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/users/john2.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/users/john.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/users/john.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CryptoManagerGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManagerGUI.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
