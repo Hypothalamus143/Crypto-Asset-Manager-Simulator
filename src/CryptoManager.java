@@ -44,6 +44,8 @@ public class CryptoManager {
     private void runPortfolioManager() {
         System.out.println("\n=== Portfolio Manager Started ===");
         System.out.println("Welcome, " + currentUser.getUsername() + "!");
+        cryptoManagerGUI.setCurrentUser(currentUser);
+        cryptoManagerGUI.showPortfolioPanel();
 
         boolean inPortfolio = true;
 

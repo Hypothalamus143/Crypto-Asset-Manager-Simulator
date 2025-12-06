@@ -36,7 +36,7 @@ public class CryptoManagerGUI {
     public static final int PORTFOLIO_DEPOSIT = 5;
     public static final int PORTFOLIO_WITHDRAW = 6;
     public static final int PORTFOLIO_LOGOUT = 8;
-
+    private User currentUser;
     private int landingChoice = 0;
     private final Object choiceLock = new Object();
 
@@ -405,305 +405,305 @@ public LoginAttempt showLoginGUI() {
 
         return result[0];
     }
-//    private JPanel createChartPanel() {
-//        chartContainer = new JPanel(new BorderLayout());
-//        updateChartContent(); // Initialize with current symbol
-//        return chartContainer;
-//    }
+    private JPanel createChartPanel() {
+        chartContainer = new JPanel(new BorderLayout());
+        updateChartContent(); // Initialize with current symbol
+        return chartContainer;
+    }
 //
-//    private void updateChartContent() {
-//        chartContainer.removeAll();
-//
-//        String symbol = currentChartSymbol;
-//        List<Double> priceHistory = MarketManager.getPriceHistory(symbol);
-//
-//        if (priceHistory.isEmpty() || priceHistory.size() < 20) {
-//            //chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
+    private void updateChartContent() {
+        chartContainer.removeAll();
+
+        String symbol = currentChartSymbol;
+        List<Double> priceHistory = MarketManager.getPriceHistory(symbol);
+
+        if (priceHistory.isEmpty() || priceHistory.size() < 20) {
+            //chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
 //            for(int i = 0; i < 20; i++) {
 //                cryptoManager.checkMarket();
 //            }
-//            showPortfolioPanel(cryptoManager.getCurrentUser());
-//        } else {
-//            // Create the chart panel
-//            JPanel chartPanel = createSimpleChart(priceHistory, symbol);
-//
-//            // Wrap it in a scroll pane with horizontal scrolling
-//            JScrollPane scrollPane = new JScrollPane(chartPanel);
-//            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-//            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-//            scrollPane.getHorizontalScrollBar().setUnitIncrement(20); // Smooth scrolling
-//
-//            chartContainer.add(scrollPane, BorderLayout.CENTER);
-//        }
-//
-//        // Buy button
-//        JButton buyButton = new JButton("Buy " + symbol);
-//        buyButton.addActionListener(e -> {
-//            double currentPrice = MarketManager.getCurrentPrice(symbol);
-//            handleBuy(symbol, currentPrice);
-//        });
-//
-//        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-//        buttonPanel.add(buyButton);
-//        chartContainer.add(buttonPanel, BorderLayout.SOUTH);
-//
-//        // Update title
-//        chartContainer.setBorder(BorderFactory.createTitledBorder(
-//                MarketManager.getCryptoName(symbol) + " (" + symbol + ") Price Chart"));
-//        chartContainer.revalidate();
-//        chartContainer.repaint();
-//    }
-//
-//
-//    private JPanel createSimpleChart(List<Double> prices, String symbol) {
-//        // Create a chart panel that's wider than the viewport
-//        JPanel chartPanel = new JPanel() {
-//            @Override
-//            protected void paintComponent(Graphics g) {
-//                super.paintComponent(g);
-//                // Pass this panel's dimensions to drawPriceChart
-//                drawPriceChart(g, prices, symbol, getWidth(), getHeight());
-//            }
-//
-//            @Override
-//            public Dimension getPreferredSize() {
-//                // Make width proportional to number of data points
-//                int dataPoints = prices.size();
-//                int width = Math.max(800, dataPoints * 10); // At least 800px, or 10px per data point
-//                int height = Math.max(150, getParent() != null ? getParent().getHeight() / 3 : 150);
-//                return new Dimension(width, height);
-//            }
-//        };
-//
-//        return chartPanel;
-//    }
-//
-//    private void drawPriceChart(Graphics g, List<Double> prices, String symbol, int width, int height) {
-//        if (prices.size() < 2) return;
-//
-//        // Use the full width of the chart panel (not the viewport)
-//        // This ensures all data points are visible when scrolling
-//
-//        int padding = 30; // Increased padding for better labels
-//
-//        // Find min and max prices for scaling
-//        double minPrice = Collections.min(prices);
-//        double maxPrice = Collections.max(prices);
-//        double priceRange = maxPrice - minPrice;
-//
-//        // Set background
-//        g.setColor(Color.WHITE);
-//        g.fillRect(0, 0, width, height);
-//
-//        // Draw grid lines and labels
-//        g.setColor(Color.LIGHT_GRAY);
-//        for (int i = 0; i <= 4; i++) {
-//            int y = padding + (int)((height - 2 * padding) * (1 - (double)i / 4));
-//            g.drawLine(padding, y, width - padding, y);
-//
-//            // Price labels on left
-//            double price = minPrice + (priceRange * i / 4);
-//            g.setColor(Color.BLACK);
-//            g.drawString(String.format("$%,.0f", price), 5, y + 4);
-//            g.setColor(Color.LIGHT_GRAY);
-//        }
-//
-//        // Draw time markers on bottom (if we have enough data)
-//        if (prices.size() > 10) {
-//            g.setColor(Color.GRAY);
-//            int timeMarkers = Math.min(10, prices.size() - 1);
-//            for (int i = 0; i <= timeMarkers; i++) {
-//                int x = padding + (int)((width - 2 * padding) * ((double)i / timeMarkers));
-//                g.drawLine(x, height - padding, x, height - padding + 5);
-//
-//                // Label every other marker to avoid clutter
-//                if (i % 2 == 0) {
-//                    g.setColor(Color.BLACK);
-//                    g.drawString("T-" + (timeMarkers - i), x - 10, height - padding + 20);
-//                    g.setColor(Color.GRAY);
-//                }
-//            }
-//        }
-//
-//        // Draw price line with anti-aliasing for smoother lines
-//        Graphics2D g2d = (Graphics2D) g;
-//        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//        g2d.setColor(Color.BLUE);
-//        g2d.setStroke(new BasicStroke(2.0f)); // Thicker line
-//
-//        for (int i = 1; i < prices.size(); i++) {
-//            int x1 = padding + (int)((width - 2 * padding) * ((double)(i - 1) / (prices.size() - 1)));
-//            int y1 = padding + (int)((height - 2 * padding) * (1 - (prices.get(i - 1) - minPrice) / priceRange));
-//
-//            int x2 = padding + (int)((width - 2 * padding) * ((double)i / (prices.size() - 1)));
-//            int y2 = padding + (int)((height - 2 * padding) * (1 - (prices.get(i) - minPrice) / priceRange));
-//
-//            g2d.drawLine(x1, y1, x2, y2);
-//
-//            // Draw data points for significant changes
-//            if (prices.size() > 20 && i % (prices.size() / 20) == 0 || i == prices.size() - 1) {
-//                g2d.setColor(Color.RED);
-//                g2d.fillOval(x2 - 3, y2 - 3, 6, 6);
-//                g2d.setColor(Color.BLUE);
-//            }
-//        }
-//
-//        // Draw current price info
-//        double currentPrice = prices.get(prices.size() - 1);
-//        g.setColor(Color.BLACK);
-//        g.setFont(new Font("Arial", Font.BOLD, 14));
-//        g.drawString("Current Price: $" + String.format("%,.2f", currentPrice),
-//                width - 200, padding + 15);
-//
-//        // Draw min/max labels
-//        g.setFont(new Font("Arial", Font.PLAIN, 10));
-//        g.drawString("High: $" + String.format("%,.0f", maxPrice), width - 200, padding + 35);
-//        g.drawString("Low: $" + String.format("%,.0f", minPrice), width - 200, padding + 50);
-//
-//        // Draw price change if we have enough data
-//        if (prices.size() > 1) {
-//            double firstPrice = prices.get(0);
-//            double priceChange = ((currentPrice - firstPrice) / firstPrice) * 100;
-//            Color changeColor = priceChange >= 0 ? Color.GREEN : Color.RED;
-//            g.setColor(changeColor);
-//            g.setFont(new Font("Arial", Font.BOLD, 12));
-//            g.drawString(String.format("%+.2f%%", priceChange), width - 200, padding + 70);
-//        }
-//    }
-//
-//    private JPanel createMarketPricesPanel() {
-//        JPanel marketPanel = new JPanel(new BorderLayout());
-//        marketPanel.setBorder(BorderFactory.createTitledBorder("Market Prices"));
-//
-//        // Create a container panel with GridBagLayout
-//        JPanel contentPanel = new JPanel(new GridBagLayout());
-//        GridBagConstraints gbc = new GridBagConstraints();
-//        gbc.fill = GridBagConstraints.HORIZONTAL;
-//        gbc.weightx = 1.0; // Expand horizontally
-//        gbc.gridx = 0;
-//        gbc.gridwidth = GridBagConstraints.REMAINDER; // Take full width
-//
-//        // Get current market prices
-//        Map<String, Double> marketPrices = MarketManager.getAllPrices();
-//
-//        if (marketPrices.isEmpty()) {
-//            JLabel emptyLabel = new JLabel("No market data available", JLabel.CENTER);
-//            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-//            contentPanel.add(emptyLabel, gbc);
-//        } else {
-//            int row = 0;
-//            for (Map.Entry<String, Double> entry : marketPrices.entrySet()) {
-//                gbc.gridy = row++;
-//                JPanel pricePanel = createMarketPricePanel(entry.getKey(), entry.getValue());
-//                contentPanel.add(pricePanel, gbc);
-//
-//                // Add vertical spacing
-//                gbc.gridy = row++;
-//                gbc.weighty = 0.0;
-//                contentPanel.add(Box.createVerticalStrut(5), gbc);
-//            }
-//        }
-//
-//        // Add glue to push everything up
-//        gbc.gridy++;
-//        gbc.weighty = 1.0; // Push components up
-//        contentPanel.add(Box.createVerticalGlue(), gbc);
-//
-//        // Add to scroll pane
-//        JScrollPane scrollPane = new JScrollPane(contentPanel);
-//        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-//        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-//
-//        // Add refresh button at the bottom
-//        JPanel bottomPanel = new JPanel();
-//        JButton refreshButton = new JButton("Refresh Prices");
-//        refreshButton.addActionListener(e -> handleMarket());
-//        bottomPanel.add(refreshButton);
-//
-//        marketPanel.add(scrollPane, BorderLayout.CENTER);
-//        marketPanel.add(bottomPanel, BorderLayout.SOUTH);
-//
-//        return marketPanel;
-//    }
-//
-//    private JPanel createMarketPricePanel(String symbol, double price) {
-//        // Create a panel that will fill width
-//        JPanel pricePanel = new JPanel(new BorderLayout());
-//        pricePanel.setBorder(BorderFactory.createEtchedBorder());
-//        pricePanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-//
-//        String assetName = MarketManager.getCryptoName(symbol);
-//        JLabel symbolLabel = new JLabel(assetName + " (" + symbol + ")");
-//        JLabel priceLabel = new JLabel("$" + String.format("%,.2f", price));
-//
-//        priceLabel.setFont(new Font("Arial", Font.BOLD, 12));
-//
-//        // Add padding
-//        symbolLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-//        priceLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-//
-//        pricePanel.add(symbolLabel, BorderLayout.WEST);
-//        pricePanel.add(priceLabel, BorderLayout.EAST);
-//
-//        // Create a mouse listener
-//        MouseAdapter mouseAdapter = new MouseAdapter() {
-//            @Override
-//            public void mouseClicked(MouseEvent e) {
-//                changeChart(symbol);
-//            }
-//
-//            @Override
-//            public void mouseEntered(MouseEvent e) {
-//                pricePanel.setBackground(new Color(200, 200, 200));
-//            }
-//
-//            @Override
-//            public void mouseExited(MouseEvent e) {
-//                pricePanel.setBackground(null);
-//            }
-//        };
-//
-//        // Add to all components
-//        pricePanel.addMouseListener(mouseAdapter);
-//        symbolLabel.addMouseListener(mouseAdapter);
-//        priceLabel.addMouseListener(mouseAdapter);
-//
-//        return pricePanel;
-//    }
-//    private void changeChart(String symbol) {
-//        currentChartSymbol = symbol;
-//
-//        chartContainer.removeAll();
-//
-//        List<Double> priceHistory = MarketManager.getPriceHistory(symbol);
-//
-//        if (priceHistory.isEmpty()) {
-//            chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
-//        } else {
-//            // Create a panel that will expand
-//            JPanel chartPanel = createSimpleChart(priceHistory, symbol);
-//            chartContainer.add(chartPanel, BorderLayout.CENTER);
-//        }
-//
-//        // Update buy button
-//        JButton buyButton = new JButton("Buy " + symbol);
-//        buyButton.addActionListener(e -> {
-//            double currentPrice = MarketManager.getCurrentPrice(symbol);
-//            handleBuy(symbol, currentPrice);
-//        });
-//
-//        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-//        buttonPanel.add(buyButton);
-//        chartContainer.add(buttonPanel, BorderLayout.SOUTH);
-//
-//        // Update title
-//        chartContainer.setBorder(BorderFactory.createTitledBorder(
-//                MarketManager.getCryptoName(symbol) + " (" + symbol + ") Price Chart"));
-//
-//        chartContainer.revalidate();
-//        chartContainer.repaint();
-//    }
-//
+            //showPortfolioPanel(cryptoManager.getCurrentUser());
+        } else {
+            // Create the chart panel
+            JPanel chartPanel = createSimpleChart(priceHistory, symbol);
+
+            // Wrap it in a scroll pane with horizontal scrolling
+            JScrollPane scrollPane = new JScrollPane(chartPanel);
+            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            scrollPane.getHorizontalScrollBar().setUnitIncrement(20); // Smooth scrolling
+
+            chartContainer.add(scrollPane, BorderLayout.CENTER);
+        }
+
+        // Buy button
+        JButton buyButton = new JButton("Buy " + symbol);
+        buyButton.addActionListener(e -> {
+            double currentPrice = MarketManager.getCurrentPrice(symbol);
+            //handleBuy(symbol, currentPrice);
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(buyButton);
+        chartContainer.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Update title
+        chartContainer.setBorder(BorderFactory.createTitledBorder(
+                MarketManager.getCryptoName(symbol) + " (" + symbol + ") Price Chart"));
+        chartContainer.revalidate();
+        chartContainer.repaint();
+    }
+
+
+    private JPanel createSimpleChart(List<Double> prices, String symbol) {
+        // Create a chart panel that's wider than the viewport
+        JPanel chartPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Pass this panel's dimensions to drawPriceChart
+                drawPriceChart(g, prices, symbol, getWidth(), getHeight());
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                // Make width proportional to number of data points
+                int dataPoints = prices.size();
+                int width = Math.max(800, dataPoints * 10); // At least 800px, or 10px per data point
+                int height = Math.max(150, getParent() != null ? getParent().getHeight() / 3 : 150);
+                return new Dimension(width, height);
+            }
+        };
+
+        return chartPanel;
+    }
+
+    private void drawPriceChart(Graphics g, List<Double> prices, String symbol, int width, int height) {
+        if (prices.size() < 2) return;
+
+        // Use the full width of the chart panel (not the viewport)
+        // This ensures all data points are visible when scrolling
+
+        int padding = 30; // Increased padding for better labels
+
+        // Find min and max prices for scaling
+        double minPrice = Collections.min(prices);
+        double maxPrice = Collections.max(prices);
+        double priceRange = maxPrice - minPrice;
+
+        // Set background
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, width, height);
+
+        // Draw grid lines and labels
+        g.setColor(Color.LIGHT_GRAY);
+        for (int i = 0; i <= 4; i++) {
+            int y = padding + (int)((height - 2 * padding) * (1 - (double)i / 4));
+            g.drawLine(padding, y, width - padding, y);
+
+            // Price labels on left
+            double price = minPrice + (priceRange * i / 4);
+            g.setColor(Color.BLACK);
+            g.drawString(String.format("$%,.0f", price), 5, y + 4);
+            g.setColor(Color.LIGHT_GRAY);
+        }
+
+        // Draw time markers on bottom (if we have enough data)
+        if (prices.size() > 10) {
+            g.setColor(Color.GRAY);
+            int timeMarkers = Math.min(10, prices.size() - 1);
+            for (int i = 0; i <= timeMarkers; i++) {
+                int x = padding + (int)((width - 2 * padding) * ((double)i / timeMarkers));
+                g.drawLine(x, height - padding, x, height - padding + 5);
+
+                // Label every other marker to avoid clutter
+                if (i % 2 == 0) {
+                    g.setColor(Color.BLACK);
+                    g.drawString("T-" + (timeMarkers - i), x - 10, height - padding + 20);
+                    g.setColor(Color.GRAY);
+                }
+            }
+        }
+
+        // Draw price line with anti-aliasing for smoother lines
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setColor(Color.BLUE);
+        g2d.setStroke(new BasicStroke(2.0f)); // Thicker line
+
+        for (int i = 1; i < prices.size(); i++) {
+            int x1 = padding + (int)((width - 2 * padding) * ((double)(i - 1) / (prices.size() - 1)));
+            int y1 = padding + (int)((height - 2 * padding) * (1 - (prices.get(i - 1) - minPrice) / priceRange));
+
+            int x2 = padding + (int)((width - 2 * padding) * ((double)i / (prices.size() - 1)));
+            int y2 = padding + (int)((height - 2 * padding) * (1 - (prices.get(i) - minPrice) / priceRange));
+
+            g2d.drawLine(x1, y1, x2, y2);
+
+            // Draw data points for significant changes
+            if (prices.size() > 20 && i % (prices.size() / 20) == 0 || i == prices.size() - 1) {
+                g2d.setColor(Color.RED);
+                g2d.fillOval(x2 - 3, y2 - 3, 6, 6);
+                g2d.setColor(Color.BLUE);
+            }
+        }
+
+        // Draw current price info
+        double currentPrice = prices.get(prices.size() - 1);
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 14));
+        g.drawString("Current Price: $" + String.format("%,.2f", currentPrice),
+                width - 200, padding + 15);
+
+        // Draw min/max labels
+        g.setFont(new Font("Arial", Font.PLAIN, 10));
+        g.drawString("High: $" + String.format("%,.0f", maxPrice), width - 200, padding + 35);
+        g.drawString("Low: $" + String.format("%,.0f", minPrice), width - 200, padding + 50);
+
+        // Draw price change if we have enough data
+        if (prices.size() > 1) {
+            double firstPrice = prices.get(0);
+            double priceChange = ((currentPrice - firstPrice) / firstPrice) * 100;
+            Color changeColor = priceChange >= 0 ? Color.GREEN : Color.RED;
+            g.setColor(changeColor);
+            g.setFont(new Font("Arial", Font.BOLD, 12));
+            g.drawString(String.format("%+.2f%%", priceChange), width - 200, padding + 70);
+        }
+    }
+
+    private JPanel createMarketPricesPanel() {
+        JPanel marketPanel = new JPanel(new BorderLayout());
+        marketPanel.setBorder(BorderFactory.createTitledBorder("Market Prices"));
+
+        // Create a container panel with GridBagLayout
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0; // Expand horizontally
+        gbc.gridx = 0;
+        gbc.gridwidth = GridBagConstraints.REMAINDER; // Take full width
+
+        // Get current market prices
+        Map<String, Double> marketPrices = MarketManager.getAllPrices();
+
+        if (marketPrices.isEmpty()) {
+            JLabel emptyLabel = new JLabel("No market data available", JLabel.CENTER);
+            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            contentPanel.add(emptyLabel, gbc);
+        } else {
+            int row = 0;
+            for (Map.Entry<String, Double> entry : marketPrices.entrySet()) {
+                gbc.gridy = row++;
+                JPanel pricePanel = createMarketPricePanel(entry.getKey(), entry.getValue());
+                contentPanel.add(pricePanel, gbc);
+
+                // Add vertical spacing
+                gbc.gridy = row++;
+                gbc.weighty = 0.0;
+                contentPanel.add(Box.createVerticalStrut(5), gbc);
+            }
+        }
+
+        // Add glue to push everything up
+        gbc.gridy++;
+        gbc.weighty = 1.0; // Push components up
+        contentPanel.add(Box.createVerticalGlue(), gbc);
+
+        // Add to scroll pane
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        // Add refresh button at the bottom
+        JPanel bottomPanel = new JPanel();
+        JButton refreshButton = new JButton("Refresh Prices");
+        //refreshButton.addActionListener(e -> handleMarket());
+        bottomPanel.add(refreshButton);
+
+        marketPanel.add(scrollPane, BorderLayout.CENTER);
+        marketPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        return marketPanel;
+    }
+
+    private JPanel createMarketPricePanel(String symbol, double price) {
+        // Create a panel that will fill width
+        JPanel pricePanel = new JPanel(new BorderLayout());
+        pricePanel.setBorder(BorderFactory.createEtchedBorder());
+        pricePanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        String assetName = MarketManager.getCryptoName(symbol);
+        JLabel symbolLabel = new JLabel(assetName + " (" + symbol + ")");
+        JLabel priceLabel = new JLabel("$" + String.format("%,.2f", price));
+
+        priceLabel.setFont(new Font("Arial", Font.BOLD, 12));
+
+        // Add padding
+        symbolLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        priceLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        pricePanel.add(symbolLabel, BorderLayout.WEST);
+        pricePanel.add(priceLabel, BorderLayout.EAST);
+
+        // Create a mouse listener
+        MouseAdapter mouseAdapter = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                changeChart(symbol);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                pricePanel.setBackground(new Color(200, 200, 200));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                pricePanel.setBackground(null);
+            }
+        };
+
+        // Add to all components
+        pricePanel.addMouseListener(mouseAdapter);
+        symbolLabel.addMouseListener(mouseAdapter);
+        priceLabel.addMouseListener(mouseAdapter);
+
+        return pricePanel;
+    }
+    private void changeChart(String symbol) {
+        currentChartSymbol = symbol;
+
+        chartContainer.removeAll();
+
+        List<Double> priceHistory = MarketManager.getPriceHistory(symbol);
+
+        if (priceHistory.isEmpty()) {
+            chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
+        } else {
+            // Create a panel that will expand
+            JPanel chartPanel = createSimpleChart(priceHistory, symbol);
+            chartContainer.add(chartPanel, BorderLayout.CENTER);
+        }
+
+        // Update buy button
+        JButton buyButton = new JButton("Buy " + symbol);
+        buyButton.addActionListener(e -> {
+            double currentPrice = MarketManager.getCurrentPrice(symbol);
+            //handleBuy(symbol, currentPrice);
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(buyButton);
+        chartContainer.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Update title
+        chartContainer.setBorder(BorderFactory.createTitledBorder(
+                MarketManager.getCryptoName(symbol) + " (" + symbol + ") Price Chart"));
+
+        chartContainer.revalidate();
+        chartContainer.repaint();
+    }
+
     private JPanel createPortfolioHeader() {
         JPanel headerPanel = new JPanel(new BorderLayout());
 
@@ -719,37 +719,37 @@ public LoginAttempt showLoginGUI() {
         return headerPanel;
     }
 //
-//    private JPanel createSummaryPanel() {
-//        JPanel summaryPanel = new JPanel(new GridLayout(2, 3, 10, 5));
-//        summaryPanel.setBorder(BorderFactory.createTitledBorder("Portfolio Summary"));
-//
-//        User user = cryptoManager.getCurrentUser();
-//
-//        // Calculate total portfolio value
-//        double totalValue = user.getBalance();
-//        for (Asset asset : user.getAssets()) {
-//            totalValue += asset.getTotalValue();
-//        }
-//
-//        JLabel balanceLabel = new JLabel("Balance: $" + String.format("%,.2f", user.getBalance()));
-//        JLabel netProfitLabel = new JLabel("Net Profit: $" + String.format("%,.2f", user.getNetProfit()));
-//        JLabel realizedProfitLabel = new JLabel("Realized: $" + String.format("%,.2f", user.getRealizedProfit()));
-//        JLabel totalValueLabel = new JLabel("Total Value: $" + String.format("%,.2f", totalValue));
-//
-//        // Style the labels
-//        Font boldFont = new Font("Arial", Font.BOLD, 14);
-//        balanceLabel.setFont(boldFont);
-//        totalValueLabel.setFont(boldFont);
-//
-//        summaryPanel.add(balanceLabel);
-//        summaryPanel.add(netProfitLabel);
-//        summaryPanel.add(realizedProfitLabel);
-//        summaryPanel.add(totalValueLabel);
-//        summaryPanel.add(new JLabel()); // Empty cell
-//        summaryPanel.add(new JLabel()); // Empty cell
-//
-//        return summaryPanel;
-//    }
+    private JPanel createSummaryPanel() {
+        JPanel summaryPanel = new JPanel(new GridLayout(2, 3, 10, 5));
+        summaryPanel.setBorder(BorderFactory.createTitledBorder("Portfolio Summary"));
+
+        User user = currentUser;
+
+        // Calculate total portfolio value
+        double totalValue = user.getBalance();
+        for (Asset asset : user.getAssets()) {
+            totalValue += asset.getTotalValue();
+        }
+
+        JLabel balanceLabel = new JLabel("Balance: $" + String.format("%,.2f", user.getBalance()));
+        JLabel netProfitLabel = new JLabel("Net Profit: $" + String.format("%,.2f", user.getNetProfit()));
+        JLabel realizedProfitLabel = new JLabel("Realized: $" + String.format("%,.2f", user.getRealizedProfit()));
+        JLabel totalValueLabel = new JLabel("Total Value: $" + String.format("%,.2f", totalValue));
+
+        // Style the labels
+        Font boldFont = new Font("Arial", Font.BOLD, 14);
+        balanceLabel.setFont(boldFont);
+        totalValueLabel.setFont(boldFont);
+
+        summaryPanel.add(balanceLabel);
+        summaryPanel.add(netProfitLabel);
+        summaryPanel.add(realizedProfitLabel);
+        summaryPanel.add(totalValueLabel);
+        summaryPanel.add(new JLabel()); // Empty cell
+        summaryPanel.add(new JLabel()); // Empty cell
+
+        return summaryPanel;
+    }
 //
 //    private double showBuyCryptoGUI(String symbol, double currentPrice, double currentBalance) {
 //        JDialog buyDialog = new JDialog(mainFrame, "Buy " + cryptoManager.getAssetName(symbol), true);
@@ -954,44 +954,44 @@ public LoginAttempt showLoginGUI() {
 //        return result[0];
 //    }
 //
-//    private JPanel createAssetsPanel() {
-//        JPanel assetsContainer = new JPanel(new BorderLayout());
-//        assetsContainer.setBorder(BorderFactory.createTitledBorder("Your Assets"));
-//
-//        // Create sorting controls panel
-//        JPanel sortPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-//
-//        // Sort by dropdown
-//        String[] sortOptions = {"Symbol", "Total Value", "Profit Amount", "Profit Percentage", "Buy Price", "Amount"};
-//        JComboBox<String> sortByCombo = new JComboBox<>(sortOptions);
-//        sortByCombo.setSelectedItem(currentSortBy);
-//
-//        // Sort direction dropdown
-//        String[] directionOptions = {"Ascending", "Descending"};
-//        JComboBox<String> directionCombo = new JComboBox<>(directionOptions);
-//        directionCombo.setSelectedItem(currentSortDirection);
-//
-//        sortPanel.add(new JLabel("Sort by:"));
-//        sortPanel.add(sortByCombo);
-//        sortPanel.add(new JLabel("Order:"));
-//        sortPanel.add(directionCombo);
-//
-//        // Assets list panel
-//        JPanel assetsListPanel = new JPanel();
-//        assetsListPanel.setLayout(new BoxLayout(assetsListPanel, BoxLayout.Y_AXIS));
-//
-//        // Populate assets
-//        refreshAssetsList(assetsListPanel);
-//
-//        // Create scroll pane - disable horizontal scrolling
-//        JScrollPane scrollPane = new JScrollPane(assetsListPanel);
-//        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-//        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Disable horizontal scroll
-//
-//        // Prevent horizontal expansion
-//        assetsListPanel.setMaximumSize(new Dimension(500, Integer.MAX_VALUE));
-//
-//        // Add action listeners for auto-sort
+    private JPanel createAssetsPanel() {
+        JPanel assetsContainer = new JPanel(new BorderLayout());
+        assetsContainer.setBorder(BorderFactory.createTitledBorder("Your Assets"));
+
+        // Create sorting controls panel
+        JPanel sortPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        // Sort by dropdown
+        String[] sortOptions = {"Symbol", "Total Value", "Profit Amount", "Profit Percentage", "Buy Price", "Amount"};
+        JComboBox<String> sortByCombo = new JComboBox<>(sortOptions);
+        sortByCombo.setSelectedItem(currentSortBy);
+
+        // Sort direction dropdown
+        String[] directionOptions = {"Ascending", "Descending"};
+        JComboBox<String> directionCombo = new JComboBox<>(directionOptions);
+        directionCombo.setSelectedItem(currentSortDirection);
+
+        sortPanel.add(new JLabel("Sort by:"));
+        sortPanel.add(sortByCombo);
+        sortPanel.add(new JLabel("Order:"));
+        sortPanel.add(directionCombo);
+
+        // Assets list panel
+        JPanel assetsListPanel = new JPanel();
+        assetsListPanel.setLayout(new BoxLayout(assetsListPanel, BoxLayout.Y_AXIS));
+
+        // Populate assets
+        refreshAssetsList(assetsListPanel);
+
+        // Create scroll pane - disable horizontal scrolling
+        JScrollPane scrollPane = new JScrollPane(assetsListPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Disable horizontal scroll
+
+        // Prevent horizontal expansion
+        assetsListPanel.setMaximumSize(new Dimension(500, Integer.MAX_VALUE));
+
+        // Add action listeners for auto-sort
 //        ActionListener sortListener = e -> {
 //            handleSort((String) sortByCombo.getSelectedItem(),
 //                    (String) directionCombo.getSelectedItem());
@@ -999,12 +999,12 @@ public LoginAttempt showLoginGUI() {
 //
 //        sortByCombo.addActionListener(sortListener);
 //        directionCombo.addActionListener(sortListener);
-//
-//        assetsContainer.add(sortPanel, BorderLayout.NORTH);
-//        assetsContainer.add(scrollPane, BorderLayout.CENTER);
-//
-//        return assetsContainer;
-//    }
+
+        assetsContainer.add(sortPanel, BorderLayout.NORTH);
+        assetsContainer.add(scrollPane, BorderLayout.CENTER);
+
+        return assetsContainer;
+    }
 private JPanel createActionButtons() {
     JPanel buttonPanel = new JPanel(new FlowLayout());
 
@@ -1026,93 +1026,93 @@ private JPanel createActionButtons() {
 
     return buttonPanel;
 }
-//
-//    private void refreshAssetsList(JPanel assetsPanel) {
-//        assetsPanel.removeAll();
-//
-//        List<Asset> assets = cryptoManager.getCurrentUser().getAssets();
-//
-//        if (assets.isEmpty()) {
-//            JLabel emptyLabel = new JLabel("No assets yet. Click 'Buy Crypto' to get started!");
-//            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-//            assetsPanel.add(emptyLabel);
-//        } else {
-//            for (Asset asset : assets) {
-//                assetsPanel.add(createAssetPanel(asset));
-//            }
-//        }
-//
-//        assetsPanel.revalidate();
-//        assetsPanel.repaint();
-//    }
-//
-//    private JPanel createAssetPanel(Asset asset) {
-//        JPanel assetPanel = new JPanel(new BorderLayout());
-//        assetPanel.setBorder(BorderFactory.createEtchedBorder());
-//        assetPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
-//        assetPanel.setPreferredSize(new Dimension(480, 60));
-//        assetPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-//
-//        double currentPrice = asset.getCurrentPrice();
-//        double unrealizedProfit = asset.getUnrealizedProfit();
-//        double profitPercentage = (currentPrice - asset.getBuyPrice()) / asset.getBuyPrice() * 100;
-//
-//        // Main info
-//        JLabel mainInfo = new JLabel(String.format("%.6f %s | Buy Price: $%,.2f",
-//                asset.getAmount(), asset.getSymbol(), asset.getBuyPrice()));
-//        mainInfo.setFont(new Font("Arial", Font.BOLD, 12));
-//
-//        // Profit/Loss info
-//        JLabel plInfo = new JLabel(String.format("Current Value: $%,.2f | P/L: $%,.2f (%.2f%%)",
-//                asset.getTotalValue(), unrealizedProfit, profitPercentage));
-//
-//        // Color code based on profit/loss
-//        if (unrealizedProfit >= 0) {
-//            plInfo.setForeground(Color.GREEN);
-//        } else {
-//            plInfo.setForeground(Color.RED);
-//        }
-//
-//        JPanel infoPanel = new JPanel(new GridLayout(2, 1));
-//        infoPanel.setOpaque(false); // Make this panel transparent
-//        infoPanel.add(mainInfo);
-//        infoPanel.add(plInfo);
-//
-//        // Make labels non-opaque so background shows through
-//        mainInfo.setOpaque(false);
-//        plInfo.setOpaque(false);
-//
-//        assetPanel.add(infoPanel, BorderLayout.CENTER);
-//
-//        // Create a mouse listener that will work for the entire panel
-//        MouseAdapter mouseAdapter = new MouseAdapter() {
+
+    private void refreshAssetsList(JPanel assetsPanel) {
+        assetsPanel.removeAll();
+
+        List<Asset> assets = currentUser.getAssets();
+
+        if (assets.isEmpty()) {
+            JLabel emptyLabel = new JLabel("No assets yet. Click 'Buy Crypto' to get started!");
+            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            assetsPanel.add(emptyLabel);
+        } else {
+            for (Asset asset : assets) {
+                assetsPanel.add(createAssetPanel(asset));
+            }
+        }
+
+        assetsPanel.revalidate();
+        assetsPanel.repaint();
+    }
+
+    private JPanel createAssetPanel(Asset asset) {
+        JPanel assetPanel = new JPanel(new BorderLayout());
+        assetPanel.setBorder(BorderFactory.createEtchedBorder());
+        assetPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+        assetPanel.setPreferredSize(new Dimension(480, 60));
+        assetPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        double currentPrice = asset.getCurrentPrice();
+        double unrealizedProfit = asset.getUnrealizedProfit();
+        double profitPercentage = (currentPrice - asset.getBuyPrice()) / asset.getBuyPrice() * 100;
+
+        // Main info
+        JLabel mainInfo = new JLabel(String.format("%.6f %s | Buy Price: $%,.2f",
+                asset.getAmount(), asset.getSymbol(), asset.getBuyPrice()));
+        mainInfo.setFont(new Font("Arial", Font.BOLD, 12));
+
+        // Profit/Loss info
+        JLabel plInfo = new JLabel(String.format("Current Value: $%,.2f | P/L: $%,.2f (%.2f%%)",
+                asset.getTotalValue(), unrealizedProfit, profitPercentage));
+
+        // Color code based on profit/loss
+        if (unrealizedProfit >= 0) {
+            plInfo.setForeground(Color.GREEN);
+        } else {
+            plInfo.setForeground(Color.RED);
+        }
+
+        JPanel infoPanel = new JPanel(new GridLayout(2, 1));
+        infoPanel.setOpaque(false); // Make this panel transparent
+        infoPanel.add(mainInfo);
+        infoPanel.add(plInfo);
+
+        // Make labels non-opaque so background shows through
+        mainInfo.setOpaque(false);
+        plInfo.setOpaque(false);
+
+        assetPanel.add(infoPanel, BorderLayout.CENTER);
+
+        // Create a mouse listener that will work for the entire panel
+        MouseAdapter mouseAdapter = new MouseAdapter() {
 //            @Override
 //            public void mouseClicked(MouseEvent e) {
 //                handleSell(asset);
 //            }
-//
-//            @Override
-//            public void mouseEntered(MouseEvent e) {
-//                assetPanel.setBackground(new Color(200, 200, 200)); // Darker gray
-//            }
-//
-//            @Override
-//            public void mouseExited(MouseEvent e) {
-//                assetPanel.setBackground(null);
-//            }
-//        };
-//
-//        // Add the mouse listener to both the main panel and the info panel
-//        assetPanel.addMouseListener(mouseAdapter);
-//        infoPanel.addMouseListener(mouseAdapter);
-//
-//        // Also add to the labels to ensure full coverage
-//        mainInfo.addMouseListener(mouseAdapter);
-//        plInfo.addMouseListener(mouseAdapter);
-//
-//        return assetPanel;
-//    }
-//
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                assetPanel.setBackground(new Color(200, 200, 200)); // Darker gray
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                assetPanel.setBackground(null);
+            }
+        };
+
+        // Add the mouse listener to both the main panel and the info panel
+        assetPanel.addMouseListener(mouseAdapter);
+        infoPanel.addMouseListener(mouseAdapter);
+
+        // Also add to the labels to ensure full coverage
+        mainInfo.addMouseListener(mouseAdapter);
+        plInfo.addMouseListener(mouseAdapter);
+
+        return assetPanel;
+    }
+
 //    private void handleLogout() {
 //        authManager.logout();
 //        cryptoManager.setCurrentUser(null);
@@ -1165,7 +1165,7 @@ private JPanel createActionButtons() {
 //    }
 //
 //
-    public void showPortfolioPanel(User user) {
+    public void showPortfolioPanel() {
         // Always create a fresh portfolio panel
         JPanel portfolioPanel = createPortfolioPanel();
 
@@ -1178,13 +1178,6 @@ private JPanel createActionButtons() {
         }
     }
 
-//
-//        portfolioPanel.setName(PORTFOLIO_PANEL);
-//        mainPanel.add(portfolioPanel, PORTFOLIO_PANEL);
-//        cardLayout.show(mainPanel, PORTFOLIO_PANEL);
-//
-//        // No refresh needed - panel is created fresh with latest data
-//    }
 //
     private JPanel createPortfolioPanel() {
         JPanel portfolioPanel = new JPanel(new BorderLayout(10, 10));
@@ -1200,6 +1193,35 @@ private JPanel createActionButtons() {
         portfolioPanel.add(createActionButtons(), BorderLayout.SOUTH);
 
         return portfolioPanel;
+    }
+    private JPanel createPortfolioContent() {
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridx = 0;
+
+        // Summary panel - top
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.0; // Doesn't expand vertically
+        contentPanel.add(createSummaryPanel(), gbc);
+
+        // Chart panel - middle
+        gbc.gridy = 1;
+        gbc.weighty = 0.3; // Takes 30% of vertical space
+        chartPanel = createChartPanel();
+        contentPanel.add(chartPanel, gbc);
+
+        // Split pane - bottom
+        gbc.gridy = 2;
+        gbc.weighty = 0.7; // Takes 70% of vertical space
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane.setLeftComponent(createAssetsPanel());
+        splitPane.setRightComponent(createMarketPricesPanel());
+        splitPane.setDividerLocation(0.65); // Percentage instead of pixels
+        contentPanel.add(splitPane, gbc);
+
+        return contentPanel;
     }
 //
 //    public static double showWithdrawGUI(double currentBalance) {
@@ -1619,7 +1641,9 @@ private JPanel createActionButtons() {
             portfolioChoiceLock.notifyAll();
         }
     }
-
+    public void setCurrentUser(User user){
+        currentUser = user;
+    }
     public static CryptoManagerGUI getInstance() {
         if(instance == null) {
             instance = new CryptoManagerGUI();
