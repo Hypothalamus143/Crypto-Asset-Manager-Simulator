@@ -16,6 +16,7 @@ public class CryptoManagerGUI {
     private CardLayout cardLayout;
     private JPanel mainPanel;
     private String currentSortBy = "Symbol";
+    private Asset currentAsset;
     private String currentSortDirection = "Ascending";
 
     // Panel constants
@@ -33,10 +34,15 @@ public class CryptoManagerGUI {
     private final Object portfolioChoiceLock = new Object();
     // Add these instance variables:
     // Add these constants:
+    public static final int PORTFOLIO_BUY = 2;
+    public static final int PORTFOLIO_SELL = 3;
+    public static final int PORTFOLIO_REFRESH_PRICES = 4;
     public static final int PORTFOLIO_DEPOSIT = 5;
     public static final int PORTFOLIO_WITHDRAW = 6;
+    public static final int PORTFOLIO_SORT = 7;
     public static final int PORTFOLIO_LOGOUT = 8;
     private User currentUser;
+    private String buyChoice = "";
     private int landingChoice = 0;
     private final Object choiceLock = new Object();
 
@@ -407,53 +413,9 @@ public LoginAttempt showLoginGUI() {
     }
     private JPanel createChartPanel() {
         chartContainer = new JPanel(new BorderLayout());
-        updateChartContent(); // Initialize with current symbol
+        changeChart(currentChartSymbol);
         return chartContainer;
     }
-//
-    private void updateChartContent() {
-        chartContainer.removeAll();
-
-        String symbol = currentChartSymbol;
-        List<Double> priceHistory = MarketManager.getPriceHistory(symbol);
-
-        if (priceHistory.isEmpty() || priceHistory.size() < 20) {
-            //chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
-//            for(int i = 0; i < 20; i++) {
-//                cryptoManager.checkMarket();
-//            }
-            //showPortfolioPanel(cryptoManager.getCurrentUser());
-        } else {
-            // Create the chart panel
-            JPanel chartPanel = createSimpleChart(priceHistory, symbol);
-
-            // Wrap it in a scroll pane with horizontal scrolling
-            JScrollPane scrollPane = new JScrollPane(chartPanel);
-            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            scrollPane.getHorizontalScrollBar().setUnitIncrement(20); // Smooth scrolling
-
-            chartContainer.add(scrollPane, BorderLayout.CENTER);
-        }
-
-        // Buy button
-        JButton buyButton = new JButton("Buy " + symbol);
-        buyButton.addActionListener(e -> {
-            double currentPrice = MarketManager.getCurrentPrice(symbol);
-            //handleBuy(symbol, currentPrice);
-        });
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.add(buyButton);
-        chartContainer.add(buttonPanel, BorderLayout.SOUTH);
-
-        // Update title
-        chartContainer.setBorder(BorderFactory.createTitledBorder(
-                MarketManager.getCryptoName(symbol) + " (" + symbol + ") Price Chart"));
-        chartContainer.revalidate();
-        chartContainer.repaint();
-    }
-
 
     private JPanel createSimpleChart(List<Double> prices, String symbol) {
         // Create a chart panel that's wider than the viewport
@@ -617,7 +579,10 @@ public LoginAttempt showLoginGUI() {
         // Add refresh button at the bottom
         JPanel bottomPanel = new JPanel();
         JButton refreshButton = new JButton("Refresh Prices");
-        //refreshButton.addActionListener(e -> handleMarket());
+        refreshButton.addActionListener(e -> {
+            System.out.println("GUI: Refresh Prices button clicked");
+            notifyPortfolioChoice(PORTFOLIO_REFRESH_PRICES);
+        });
         bottomPanel.add(refreshButton);
 
         marketPanel.add(scrollPane, BorderLayout.CENTER);
@@ -687,9 +652,11 @@ public LoginAttempt showLoginGUI() {
 
         // Update buy button
         JButton buyButton = new JButton("Buy " + symbol);
+        // Add listener to notify choice
         buyButton.addActionListener(e -> {
-            double currentPrice = MarketManager.getCurrentPrice(symbol);
-            //handleBuy(symbol, currentPrice);
+            System.out.println("GUI: Buy " + symbol + " button clicked (from chart change)");
+            buyChoice = symbol;
+            notifyPortfolioChoice(PORTFOLIO_BUY);
         });
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -711,7 +678,11 @@ public LoginAttempt showLoginGUI() {
         //welcomeLabel.setFont(new Font("Arial", Font.BOLD, 18));
 
         JButton logoutButton = new JButton("Logout");
-        //logoutButton.addActionListener(e -> handleLogout());
+        // Add listener to notify choice
+        logoutButton.addActionListener(e -> {
+            System.out.println("GUI: Logout button clicked");
+            notifyPortfolioChoice(PORTFOLIO_LOGOUT);
+        });
 
         //headerPanel.add(welcomeLabel, BorderLayout.WEST);
         headerPanel.add(logoutButton, BorderLayout.EAST);
@@ -751,209 +722,210 @@ public LoginAttempt showLoginGUI() {
         return summaryPanel;
     }
 //
-//    private double showBuyCryptoGUI(String symbol, double currentPrice, double currentBalance) {
-//        JDialog buyDialog = new JDialog(mainFrame, "Buy " + cryptoManager.getAssetName(symbol), true);
-//        buyDialog.setSize(400, 350);
-//        buyDialog.setLocationRelativeTo(mainFrame);
-//        buyDialog.setResizable(false);
-//
-//        JPanel panel = new JPanel();
-//        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-//        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-//
-//        // Info section
-//        JPanel infoPanel = new JPanel(new GridLayout(3, 2, 10, 5));
-//        infoPanel.setMaximumSize(new Dimension(380, 80));
-//
-//        JLabel symbolLabel = new JLabel("Cryptocurrency:");
-//        JLabel symbolValue = new JLabel(cryptoManager.getAssetName(symbol) + " (" + symbol + ")");
-//
-//        JLabel priceLabel = new JLabel("Current Price:");
-//        JLabel priceValue = new JLabel("$" + String.format("%,.2f", currentPrice));
-//
-//        JLabel balanceLabel = new JLabel("Your Balance:");
-//        JLabel balanceValue = new JLabel("$" + String.format("%,.2f", currentBalance));
-//
-//        infoPanel.add(symbolLabel);
-//        infoPanel.add(symbolValue);
-//        infoPanel.add(priceLabel);
-//        infoPanel.add(priceValue);
-//        infoPanel.add(balanceLabel);
-//        infoPanel.add(balanceValue);
-//
-//        // Slider section
-//        JPanel sliderPanel = new JPanel();
-//        sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS));
-//        sliderPanel.setBorder(BorderFactory.createTitledBorder("Amount to Buy"));
-//        sliderPanel.setMaximumSize(new Dimension(380, 120));
-//
-//        JSlider amountSlider = new JSlider(0, 100, 0); // 0% to 100%
-//        amountSlider.setMajorTickSpacing(25);
-//        amountSlider.setMinorTickSpacing(5);
-//        amountSlider.setPaintTicks(true);
-//        amountSlider.setPaintLabels(true);
-//
-//        JLabel sliderValue = new JLabel("0% - $0.00", JLabel.CENTER);
-//        sliderValue.setFont(new Font("Arial", Font.BOLD, 12));
-//
-//        // Manual input field
-//        JPanel inputPanel = new JPanel(new FlowLayout());
-//        JLabel amountLabel = new JLabel("Amount:");
-//        JTextField amountField = new JTextField("0", 10);
-//        inputPanel.add(amountLabel);
-//        inputPanel.add(amountField);
-//
-//        sliderPanel.add(sliderValue);
-//        sliderPanel.add(Box.createVerticalStrut(5));
-//        sliderPanel.add(amountSlider);
-//        sliderPanel.add(Box.createVerticalStrut(5));
-//        sliderPanel.add(inputPanel);
-//
-//        // Cost display
-//        JPanel costPanel = new JPanel();
-//        costPanel.setBorder(BorderFactory.createTitledBorder("Purchase Summary"));
-//        costPanel.setMaximumSize(new Dimension(380, 60));
-//
-//        JLabel costLabel = new JLabel("Total Cost: $0.00", JLabel.CENTER);
-//        costLabel.setFont(new Font("Arial", Font.BOLD, 14));
-//        costPanel.add(costLabel);
-//
-//        // Buttons
-//        JPanel buttonPanel = new JPanel(new FlowLayout());
-//        JButton buyBtn = new JButton("Buy");
-//        JButton cancelBtn = new JButton("Cancel");
-//        buttonPanel.add(buyBtn);
-//        buttonPanel.add(cancelBtn);
-//
-//        // Add all panels
-//        panel.add(infoPanel);
-//        panel.add(Box.createVerticalStrut(10));
-//        panel.add(sliderPanel);
-//        panel.add(Box.createVerticalStrut(10));
-//        panel.add(costPanel);
-//        panel.add(Box.createVerticalStrut(10));
-//        panel.add(buttonPanel);
-//
-//        final double[] result = new double[]{-1}; // -1 means cancelled
-//
-//        // Update function
-//        Runnable updateValues = () -> {
-//            try {
-//                String amountText = amountField.getText().trim();
-//                if (amountText.isEmpty()) {
-//                    amountField.setText("0");
-//                    return;
-//                }
-//
-//                double amount = Double.parseDouble(amountText);
-//
-//                // Handle very small amounts that might round to 0
-//                if (amount > 0 && amount < 0.000001) {
-//                    amount = 0.000001;
-//                    amountField.setText(String.format("%.6f", amount));
-//                }
-//
-//                double totalCost = amount * currentPrice;
-//                double percentage = (totalCost / currentBalance) * 100;
-//
-//                // Update labels
-//                sliderValue.setText(String.format("%.1f%% - $%,.2f", percentage, totalCost));
-//                costLabel.setText(String.format("Total Cost: $%,.2f", totalCost));
-//
-//                // Color code based on affordability
-//                if (totalCost > currentBalance) {
-//                    costLabel.setForeground(Color.RED);
-//                    buyBtn.setEnabled(false);
-//                } else {
-//                    costLabel.setForeground(Color.BLACK);
-//                    buyBtn.setEnabled(true);
-//                }
-//
-//            } catch (NumberFormatException ex) {
-//                // If we get an error, reset to 0
-//                amountField.setText("0");
-//                costLabel.setText("Total Cost: $0.00");
-//                costLabel.setForeground(Color.BLACK);
-//                buyBtn.setEnabled(false);
-//            }
-//        };
-//
-//        // Slider listener
-//        amountSlider.addChangeListener(e -> {
-//            if (!amountSlider.getValueIsAdjusting()) {
-//                SwingUtilities.invokeLater(() -> {
-//                    double percentage = amountSlider.getValue();
-//
-//                    // Ensure we have a minimum viable amount when percentage > 0
-//                    if (percentage > 0) {
-//                        double totalCost = currentBalance * (percentage / 100.0);
-//                        double amount = totalCost / currentPrice;
-//
-//                        // Ensure minimum amount to avoid rounding to 0
-//                        if (amount < 0.000001) {
-//                            amount = 0.000001;
-//                        }
-//
-//                        amountField.setText(String.format("%.6f", amount));
-//                    } else {
-//                        amountField.setText("0");
-//                    }
-//                    updateValues.run();
-//                });
-//            }
-//        });
-//
-//        // Text field listener
-//        amountField.getDocument().addDocumentListener(new DocumentListener() {
-//            public void changedUpdate(DocumentEvent e) {
-//                SwingUtilities.invokeLater(() -> updateValues.run());
-//            }
-//            public void removeUpdate(DocumentEvent e) {
-//                SwingUtilities.invokeLater(() -> updateValues.run());
-//            }
-//            public void insertUpdate(DocumentEvent e) {
-//                SwingUtilities.invokeLater(() -> updateValues.run());
-//            }
-//        });
-//
-//        buyBtn.addActionListener(e -> {
-//            try {
-//                double amount = Double.parseDouble(amountField.getText().trim());
-//
-//                if (amount <= 0) {
-//                    JOptionPane.showMessageDialog(buyDialog, "Amount must be positive");
-//                    return;
-//                }
-//
-//                double totalCost = amount * currentPrice;
-//                if (totalCost > currentBalance) {
-//                    JOptionPane.showMessageDialog(buyDialog,
-//                            String.format("Insufficient funds. You need $%,.2f", totalCost));
-//                    return;
-//                }
-//
-//                result[0] = amount;
-//                buyDialog.dispose();
-//
-//            } catch (NumberFormatException ex) {
-//                JOptionPane.showMessageDialog(buyDialog, "Please enter a valid amount");
-//            }
-//        });
-//
-//        cancelBtn.addActionListener(e -> {
-//            buyDialog.dispose();
-//        });
-//
-//        // Initialize
-//        updateValues.run();
-//
-//        buyDialog.add(panel);
-//        buyDialog.pack();
-//        buyDialog.setVisible(true);
-//
-//        return result[0];
-//    }
-//
+    public double showBuyCryptoGUI(String symbol, double currentPrice, double currentBalance) {
+        JDialog buyDialog = new JDialog(mainFrame, "Buy " + symbol, true);
+        buyDialog.setSize(400, 350);
+        buyDialog.setLocationRelativeTo(mainFrame);
+        buyDialog.setResizable(false);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Info section
+        JPanel infoPanel = new JPanel(new GridLayout(3, 2, 10, 5));
+        infoPanel.setMaximumSize(new Dimension(380, 80));
+
+        JLabel symbolLabel = new JLabel("Cryptocurrency:");
+        JLabel symbolValue = new JLabel(symbol + " (" + symbol + ")");
+
+        JLabel priceLabel = new JLabel("Current Price:");
+        JLabel priceValue = new JLabel("$" + String.format("%,.2f", currentPrice));
+
+        JLabel balanceLabel = new JLabel("Your Balance:");
+        JLabel balanceValue = new JLabel("$" + String.format("%,.2f", currentBalance));
+
+        infoPanel.add(symbolLabel);
+        infoPanel.add(symbolValue);
+        infoPanel.add(priceLabel);
+        infoPanel.add(priceValue);
+        infoPanel.add(balanceLabel);
+        infoPanel.add(balanceValue);
+
+        // Slider section
+        JPanel sliderPanel = new JPanel();
+        sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS));
+        sliderPanel.setBorder(BorderFactory.createTitledBorder("Amount to Buy"));
+        sliderPanel.setMaximumSize(new Dimension(380, 120));
+
+        JSlider amountSlider = new JSlider(0, 100, 0); // 0% to 100%
+        amountSlider.setMajorTickSpacing(25);
+        amountSlider.setMinorTickSpacing(5);
+        amountSlider.setPaintTicks(true);
+        amountSlider.setPaintLabels(true);
+
+        JLabel sliderValue = new JLabel("0% - $0.00", JLabel.CENTER);
+        sliderValue.setFont(new Font("Arial", Font.BOLD, 12));
+
+        // Manual input field
+        JPanel inputPanel = new JPanel(new FlowLayout());
+        JLabel amountLabel = new JLabel("Amount:");
+        JTextField amountField = new JTextField("0", 10);
+        inputPanel.add(amountLabel);
+        inputPanel.add(amountField);
+
+        sliderPanel.add(sliderValue);
+        sliderPanel.add(Box.createVerticalStrut(5));
+        sliderPanel.add(amountSlider);
+        sliderPanel.add(Box.createVerticalStrut(5));
+        sliderPanel.add(inputPanel);
+
+        // Cost display
+        JPanel costPanel = new JPanel();
+        costPanel.setBorder(BorderFactory.createTitledBorder("Purchase Summary"));
+        costPanel.setMaximumSize(new Dimension(380, 60));
+
+        JLabel costLabel = new JLabel("Total Cost: $0.00", JLabel.CENTER);
+        costLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        costPanel.add(costLabel);
+
+        // Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton buyBtn = new JButton("Buy");
+        JButton cancelBtn = new JButton("Cancel");
+        buttonPanel.add(buyBtn);
+        buttonPanel.add(cancelBtn);
+
+        // Add all panels
+        panel.add(infoPanel);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(sliderPanel);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(costPanel);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(buttonPanel);
+
+        final double[] result = new double[]{-1}; // -1 means cancelled
+
+        // Update function
+        Runnable updateValues = () -> {
+            try {
+                String amountText = amountField.getText().trim();
+                if (amountText.isEmpty()) {
+                    amountField.setText("0");
+                    return;
+                }
+
+                double amount = Double.parseDouble(amountText);
+
+                // Handle very small amounts that might round to 0
+                if (amount > 0 && amount < 0.000001) {
+                    amount = 0.000001;
+                    amountField.setText(String.format("%.6f", amount));
+                }
+
+                double totalCost = amount * currentPrice;
+                double percentage = (totalCost / currentBalance) * 100;
+
+                // Update labels
+                sliderValue.setText(String.format("%.1f%% - $%,.2f", percentage, totalCost));
+                costLabel.setText(String.format("Total Cost: $%,.2f", totalCost));
+
+                // Color code based on affordability
+                if (totalCost > currentBalance) {
+                    costLabel.setForeground(Color.RED);
+                    buyBtn.setEnabled(false);
+                } else {
+                    costLabel.setForeground(Color.BLACK);
+                    buyBtn.setEnabled(true);
+                }
+
+            } catch (NumberFormatException ex) {
+                // If we get an error, reset to 0
+                amountField.setText("0");
+                costLabel.setText("Total Cost: $0.00");
+                costLabel.setForeground(Color.BLACK);
+                buyBtn.setEnabled(false);
+            }
+        };
+
+        // Slider listener
+        amountSlider.addChangeListener(e -> {
+            if (!amountSlider.getValueIsAdjusting()) {
+                SwingUtilities.invokeLater(() -> {
+                    double percentage = amountSlider.getValue();
+
+                    // Ensure we have a minimum viable amount when percentage > 0
+                    if (percentage > 0) {
+                        double totalCost = currentBalance * (percentage / 100.0);
+                        double amount = totalCost / currentPrice;
+
+                        // Ensure minimum amount to avoid rounding to 0
+                        if (amount < 0.000001) {
+                            amount = 0.000001;
+                        }
+
+                        amountField.setText(String.format("%.6f", amount));
+                    } else {
+                        amountField.setText("0");
+                    }
+                    updateValues.run();
+                });
+            }
+        });
+
+        // Text field listener
+        amountField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                SwingUtilities.invokeLater(() -> updateValues.run());
+            }
+            public void removeUpdate(DocumentEvent e) {
+                SwingUtilities.invokeLater(() -> updateValues.run());
+            }
+            public void insertUpdate(DocumentEvent e) {
+                SwingUtilities.invokeLater(() -> updateValues.run());
+            }
+        });
+
+        buyBtn.addActionListener(e -> {
+            try {
+                double amount = Double.parseDouble(amountField.getText().trim());
+
+                if (amount <= 0) {
+                    JOptionPane.showMessageDialog(buyDialog, "Amount must be positive");
+                    return;
+                }
+
+                double totalCost = amount * currentPrice;
+                if (totalCost > currentBalance) {
+                    JOptionPane.showMessageDialog(buyDialog,
+                            String.format("Insufficient funds. You need $%,.2f", totalCost));
+                    return;
+                }
+
+                result[0] = amount;
+                buyDialog.dispose();
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(buyDialog, "Please enter a valid amount");
+            }
+        });
+
+        cancelBtn.addActionListener(e -> {
+            buyDialog.dispose();
+            result[0] = 0;
+        });
+
+        // Initialize
+        updateValues.run();
+
+        buyDialog.add(panel);
+        buyDialog.pack();
+        buyDialog.setVisible(true);
+
+        return result[0];
+    }
+
     private JPanel createAssetsPanel() {
         JPanel assetsContainer = new JPanel(new BorderLayout());
         assetsContainer.setBorder(BorderFactory.createTitledBorder("Your Assets"));
@@ -991,14 +963,14 @@ public LoginAttempt showLoginGUI() {
         // Prevent horizontal expansion
         assetsListPanel.setMaximumSize(new Dimension(500, Integer.MAX_VALUE));
 
-        // Add action listeners for auto-sort
-//        ActionListener sortListener = e -> {
-//            handleSort((String) sortByCombo.getSelectedItem(),
-//                    (String) directionCombo.getSelectedItem());
-//        };
-//
-//        sortByCombo.addActionListener(sortListener);
-//        directionCombo.addActionListener(sortListener);
+        ActionListener sortListener = e -> {
+            notifyPortfolioChoice(PORTFOLIO_SORT); // Add this line
+            currentSortBy = (String) sortByCombo.getSelectedItem();
+            currentSortDirection = (String) directionCombo.getSelectedItem();
+        };
+
+        sortByCombo.addActionListener(sortListener);
+        directionCombo.addActionListener(sortListener);
 
         assetsContainer.add(sortPanel, BorderLayout.NORTH);
         assetsContainer.add(scrollPane, BorderLayout.CENTER);
@@ -1086,10 +1058,11 @@ private JPanel createActionButtons() {
 
         // Create a mouse listener that will work for the entire panel
         MouseAdapter mouseAdapter = new MouseAdapter() {
-//            @Override
-//            public void mouseClicked(MouseEvent e) {
-//                handleSell(asset);
-//            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                currentAsset = asset;
+                notifyPortfolioChoice(PORTFOLIO_SELL);
+            }
 
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -1112,49 +1085,6 @@ private JPanel createActionButtons() {
 
         return assetPanel;
     }
-
-//    private void handleLogout() {
-//        authManager.logout();
-//        cryptoManager.setCurrentUser(null);
-//        showLandingPanel();
-//    }
-//
-//    // Stub methods for actions (to be implemented)
-//    private void handleBuy(String symbol, double currentPrice) {
-//        double amount = showBuyCryptoGUI(symbol, currentPrice, cryptoManager.getCurrentUser().getBalance());
-//
-//        if (amount > 0) {
-//            // Call the modified terminal method with parameters
-//            cryptoManager.buyCrypto(symbol, currentPrice, amount);
-//            showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh portfolio
-//        }
-//    }
-//
-//    private void handleSell(Asset asset) {
-//        double amount = showSellCryptoGUI(asset);
-//
-//        if (amount > 0) {
-//            // Call the modified terminal method with parameters
-//            cryptoManager.sellCrypto(asset, amount);
-//            showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh portfolio
-//        }
-//    }
-//
-//    private void handleDeposit() {
-//        cryptoManager.deposit(); // This now calls the GUI internally
-//        showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh with new balance
-//    }
-//
-//    private void handleWithdraw() {
-//        cryptoManager.withdraw(); // This now calls the GUI internally
-//        showPortfolioPanel(cryptoManager.getCurrentUser()); // Refresh with new balance
-//    }
-//
-//    private void handleMarket() {
-//        cryptoManager.checkMarket(); // Call existing terminal method
-//        mainFrame.setVisible(true);
-//        showPortfolioPanel(cryptoManager.getCurrentUser());
-//    }
 //
 //    private void handleSort(String sortBy, String direction) {
 //        currentSortBy = sortBy;
@@ -1165,18 +1095,24 @@ private JPanel createActionButtons() {
 //    }
 //
 //
-    public void showPortfolioPanel() {
-        // Always create a fresh portfolio panel
-        JPanel portfolioPanel = createPortfolioPanel();
+public void showPortfolioPanel() {
+    // Always create a fresh portfolio panel
+    JPanel portfolioPanel = createPortfolioPanel();
 
-        // Remove existing portfolio panel if any
-        Component[] comps = mainPanel.getComponents();
-        for (Component comp : comps) {
-            if (comp.getName() != null && comp.getName().equals(PORTFOLIO_PANEL)) {
-                mainPanel.remove(comp);
-            }
+    // Remove existing portfolio panel if any
+    Component[] comps = mainPanel.getComponents();
+    for (Component comp : comps) {
+        if (comp.getName() != null && comp.getName().equals(PORTFOLIO_PANEL)) {
+            mainPanel.remove(comp);
         }
     }
+
+    portfolioPanel.setName(PORTFOLIO_PANEL);
+    mainPanel.add(portfolioPanel, PORTFOLIO_PANEL);
+    cardLayout.show(mainPanel, PORTFOLIO_PANEL);
+
+    // No refresh needed - panel is created fresh with latest data
+}
 
 //
     private JPanel createPortfolioPanel() {
@@ -1223,359 +1159,359 @@ private JPanel createActionButtons() {
 
         return contentPanel;
     }
-//
-//    public static double showWithdrawGUI(double currentBalance) {
-//        JDialog withdrawDialog = new JDialog((JFrame)null, "Withdraw Funds", true);
-//        withdrawDialog.setSize(300, 200);
-//        withdrawDialog.setLocationRelativeTo(null);
-//        withdrawDialog.setResizable(false);
-//
-//        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
-//        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-//
-//        JLabel balanceLabel = new JLabel("Current Balance:");
-//        JLabel balanceValue = new JLabel("$" + String.format("%,.2f", currentBalance));
-//        JLabel amountLabel = new JLabel("Withdraw Amount:");
-//        JTextField amountField = new JTextField();
-//
-//        JButton withdrawBtn = new JButton("Withdraw");
-//        JButton cancelBtn = new JButton("Cancel");
-//
-//        panel.add(balanceLabel);
-//        panel.add(balanceValue);
-//        panel.add(amountLabel);
-//        panel.add(amountField);
-//        panel.add(withdrawBtn);
-//        panel.add(cancelBtn);
-//
-//        final double[] result = new double[]{-1}; // -1 means cancelled
-//
-//        withdrawBtn.addActionListener(e -> {
-//            try {
-//                double amount = Double.parseDouble(amountField.getText().trim());
-//
-//                if (amount <= 0) {
-//                    JOptionPane.showMessageDialog(withdrawDialog, "Amount must be positive");
-//                    return;
-//                }
-//
-//                if (amount > currentBalance) {
-//                    JOptionPane.showMessageDialog(withdrawDialog,
-//                            String.format("Insufficient funds. You have $%,.2f", currentBalance));
-//                    return;
-//                }
-//
-//                result[0] = amount;
-//                withdrawDialog.dispose();
-//
-//            } catch (NumberFormatException ex) {
-//                JOptionPane.showMessageDialog(withdrawDialog, "Please enter a valid amount");
-//            }
-//        });
-//
-//        cancelBtn.addActionListener(e -> {
-//            withdrawDialog.dispose();
-//        });
-//
-//        // Enter key support
-//        amountField.addActionListener(e -> withdrawBtn.doClick());
-//
-//        withdrawDialog.add(panel);
-//        withdrawDialog.pack();
-//        withdrawDialog.setVisible(true);
-//
-//        return result[0];
-//    }
-//
-//    public static double showDepositGUI(double currentBalance) {
-//        JDialog depositDialog = new JDialog((JFrame)null, "Deposit Funds", true);
-//        depositDialog.setSize(300, 200);
-//        depositDialog.setLocationRelativeTo(null);
-//        depositDialog.setResizable(false);
-//
-//        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
-//        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-//
-//        JLabel balanceLabel = new JLabel("Current Balance:");
-//        JLabel balanceValue = new JLabel("$" + String.format("%,.2f", currentBalance));
-//        JLabel amountLabel = new JLabel("Deposit Amount:");
-//        JTextField amountField = new JTextField();
-//
-//        JButton depositBtn = new JButton("Deposit");
-//        JButton cancelBtn = new JButton("Cancel");
-//
-//        panel.add(balanceLabel);
-//        panel.add(balanceValue);
-//        panel.add(amountLabel);
-//        panel.add(amountField);
-//        panel.add(depositBtn);
-//        panel.add(cancelBtn);
-//
-//        final double[] result = new double[]{-1}; // -1 means cancelled
-//
-//        depositBtn.addActionListener(e -> {
-//            try {
-//                double amount = Double.parseDouble(amountField.getText().trim());
-//
-//                if (amount <= 0) {
-//                    JOptionPane.showMessageDialog(depositDialog, "Amount must be positive");
-//                    return;
-//                }
-//
-//                if (amount > 1000000) {
-//                    JOptionPane.showMessageDialog(depositDialog, "Deposit amount cannot exceed $1,000,000");
-//                    return;
-//                }
-//
-//                result[0] = amount;
-//                depositDialog.dispose();
-//
-//            } catch (NumberFormatException ex) {
-//                JOptionPane.showMessageDialog(depositDialog, "Please enter a valid amount");
-//            }
-//        });
-//
-//        cancelBtn.addActionListener(e -> {
-//            depositDialog.dispose();
-//        });
-//
-//        // Enter key support
-//        amountField.addActionListener(e -> depositBtn.doClick());
-//
-//        depositDialog.add(panel);
-//        depositDialog.pack();
-//        depositDialog.setVisible(true);
-//
-//        return result[0];
-//    }
-//
-//    private double showSellCryptoGUI(Asset asset) {
-//        JDialog sellDialog = new JDialog(mainFrame, "Sell " + asset.getSymbol(), true);
-//        sellDialog.setSize(400, 350);
-//        sellDialog.setLocationRelativeTo(mainFrame);
-//        sellDialog.setResizable(false);
-//
-//        JPanel panel = new JPanel();
-//        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-//        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-//
-//        double currentPrice = asset.getCurrentPrice();
-//
-//        // Info section
-//        JPanel infoPanel = new JPanel(new GridLayout(4, 2, 10, 5));
-//        infoPanel.setMaximumSize(new Dimension(380, 100));
-//
-//        JLabel symbolLabel = new JLabel("Cryptocurrency:");
-//        JLabel symbolValue = new JLabel(asset.getName() + " (" + asset.getSymbol() + ")");
-//
-//        JLabel priceLabel = new JLabel("Current Price:");
-//        JLabel priceValue = new JLabel("$" + String.format("%,.2f", currentPrice));
-//
-//        JLabel buyPriceLabel = new JLabel("Your Buy Price:");
-//        JLabel buyPriceValue = new JLabel("$" + String.format("%,.2f", asset.getBuyPrice()));
-//
-//        JLabel ownedLabel = new JLabel("You Own:");
-//        JLabel ownedValue = new JLabel(String.format("%.6f %s", asset.getAmount(), asset.getSymbol()));
-//
-//        infoPanel.add(symbolLabel);
-//        infoPanel.add(symbolValue);
-//        infoPanel.add(priceLabel);
-//        infoPanel.add(priceValue);
-//        infoPanel.add(buyPriceLabel);
-//        infoPanel.add(buyPriceValue);
-//        infoPanel.add(ownedLabel);
-//        infoPanel.add(ownedValue);
-//
-//        // Slider section
-//        JPanel sliderPanel = new JPanel();
-//        sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS));
-//        sliderPanel.setBorder(BorderFactory.createTitledBorder("Amount to Sell"));
-//        sliderPanel.setMaximumSize(new Dimension(380, 120));
-//
-//        JSlider amountSlider = new JSlider(0, 100, 0); // 0% to 100%
-//        amountSlider.setMajorTickSpacing(25);
-//        amountSlider.setMinorTickSpacing(5);
-//        amountSlider.setPaintTicks(true);
-//        amountSlider.setPaintLabels(true);
-//
-//        JLabel sliderValue = new JLabel("0% - 0.000000 " + asset.getSymbol(), JLabel.CENTER);
-//        sliderValue.setFont(new Font("Arial", Font.BOLD, 12));
-//
-//        // Manual input field
-//        JPanel inputPanel = new JPanel(new FlowLayout());
-//        JLabel amountLabel = new JLabel("Amount:");
-//        JTextField amountField = new JTextField("0", 10);
-//        inputPanel.add(amountLabel);
-//        inputPanel.add(amountField);
-//
-//        sliderPanel.add(sliderValue);
-//        sliderPanel.add(Box.createVerticalStrut(5));
-//        sliderPanel.add(amountSlider);
-//        sliderPanel.add(Box.createVerticalStrut(5));
-//        sliderPanel.add(inputPanel);
-//
-//        // Profit display
-//        JPanel profitPanel = new JPanel();
-//        profitPanel.setBorder(BorderFactory.createTitledBorder("Sale Summary"));
-//        profitPanel.setMaximumSize(new Dimension(380, 80));
-//
-//        JLabel proceedsLabel = new JLabel("You Receive: $0.00", JLabel.CENTER);
-//        JLabel profitLabel = new JLabel("Profit: $0.00", JLabel.CENTER);
-//        proceedsLabel.setFont(new Font("Arial", Font.BOLD, 12));
-//        profitLabel.setFont(new Font("Arial", Font.BOLD, 12));
-//
-//        JPanel profitLabels = new JPanel(new GridLayout(2, 1));
-//        profitLabels.add(proceedsLabel);
-//        profitLabels.add(profitLabel);
-//        profitPanel.add(profitLabels);
-//
-//        // Buttons
-//        JPanel buttonPanel = new JPanel(new FlowLayout());
-//        JButton sellBtn = new JButton("Sell");
-//        JButton cancelBtn = new JButton("Cancel");
-//        buttonPanel.add(sellBtn);
-//        buttonPanel.add(cancelBtn);
-//
-//        // Add all panels
-//        panel.add(infoPanel);
-//        panel.add(Box.createVerticalStrut(10));
-//        panel.add(sliderPanel);
-//        panel.add(Box.createVerticalStrut(10));
-//        panel.add(profitPanel);
-//        panel.add(Box.createVerticalStrut(10));
-//        panel.add(buttonPanel);
-//
-//        final double[] result = new double[]{-1}; // -1 means cancelled
-//
-//        // Update function
-//        Runnable updateValues = () -> {
-//            try {
-//                String amountText = amountField.getText().trim();
-//                if (amountText.isEmpty()) {
-//                    amountField.setText("0");
-//                    return;
-//                }
-//
-//                double amount = Double.parseDouble(amountText);
-//
-//                // Handle very small amounts
-//                if (amount > 0 && amount < 0.000001) {
-//                    amount = 0.000001;
-//                    amountField.setText(String.format("%.6f", amount));
-//                }
-//
-//                // Ensure we don't exceed owned amount
-//                if (amount > asset.getAmount()) {
-//                    amount = asset.getAmount();
-//                    amountField.setText(String.format("%.6f", amount));
-//                }
-//
-//                double totalValue = amount * currentPrice;
-//                double realizedProfit = (currentPrice - asset.getBuyPrice()) * amount;
-//                double percentage = (amount / asset.getAmount()) * 100;
-//
-//                // Update labels
-//                sliderValue.setText(String.format("%.1f%% - %.6f %s", percentage, amount, asset.getSymbol()));
-//                proceedsLabel.setText(String.format("You Receive: $%,.2f", totalValue));
-//                profitLabel.setText(String.format("Profit: $%,.2f", realizedProfit));
-//
-//                // Color code profit
-//                if (realizedProfit >= 0) {
-//                    profitLabel.setForeground(Color.GREEN);
-//                } else {
-//                    profitLabel.setForeground(Color.RED);
-//                }
-//
-//                sellBtn.setEnabled(amount > 0);
-//
-//            } catch (NumberFormatException ex) {
-//                amountField.setText("0");
-//                proceedsLabel.setText("You Receive: $0.00");
-//                profitLabel.setText("Profit: $0.00");
-//                profitLabel.setForeground(Color.BLACK);
-//                sellBtn.setEnabled(false);
-//            }
-//        };
-//
-//        // Slider listener
-//        amountSlider.addChangeListener(e -> {
-//            if (!amountSlider.getValueIsAdjusting()) {
-//                SwingUtilities.invokeLater(() -> {
-//                    double percentage = amountSlider.getValue();
-//                    double amount = asset.getAmount() * (percentage / 100.0);
-//
-//                    // Ensure minimum amount
-//                    if (percentage > 0 && amount < 0.000001) {
-//                        amount = 0.000001;
-//                    }
-//
-//                    amountField.setText(String.format("%.6f", amount));
-//                    updateValues.run();
-//                });
-//            }
-//        });
-//
-//        // Text field listener
-//        amountField.getDocument().addDocumentListener(new DocumentListener() {
-//            public void changedUpdate(DocumentEvent e) {
-//                SwingUtilities.invokeLater(() -> updateValues.run());
-//            }
-//            public void removeUpdate(DocumentEvent e) {
-//                SwingUtilities.invokeLater(() -> updateValues.run());
-//            }
-//            public void insertUpdate(DocumentEvent e) {
-//                SwingUtilities.invokeLater(() -> updateValues.run());
-//            }
-//        });
-//
-//        sellBtn.addActionListener(e -> {
-//            try {
-//                double amount = Double.parseDouble(amountField.getText().trim());
-//
-//                if (amount <= 0) {
-//                    JOptionPane.showMessageDialog(sellDialog, "Amount must be positive");
-//                    return;
-//                }
-//
-//                if (amount > asset.getAmount()) {
-//                    JOptionPane.showMessageDialog(sellDialog,
-//                            String.format("You only own %.6f %s", asset.getAmount(), asset.getSymbol()));
-//                    return;
-//                }
-//
-//                // Confirm sale
-//                double totalValue = amount * currentPrice;
-//                double realizedProfit = (currentPrice - asset.getBuyPrice()) * amount;
-//
-//                int confirm = JOptionPane.showConfirmDialog(sellDialog,
-//                        String.format("Sale Summary:\nAsset: %s (%s)\nAmount: %.6f\nSell Price: $%,.2f\nYou Receive: $%,.2f\nProfit: $%,.2f\n\nConfirm sale?",
-//                                asset.getName(), asset.getSymbol(), amount, currentPrice, totalValue, realizedProfit),
-//                        "Confirm Sale",
-//                        JOptionPane.YES_NO_OPTION);
-//
-//                if (confirm == JOptionPane.YES_OPTION) {
-//                    result[0] = amount;
-//                    sellDialog.dispose();
-//                }
-//
-//            } catch (NumberFormatException ex) {
-//                JOptionPane.showMessageDialog(sellDialog, "Please enter a valid amount");
-//            }
-//        });
-//
-//        cancelBtn.addActionListener(e -> {
-//            sellDialog.dispose();
-//        });
-//
-//        // Initialize
-//        updateValues.run();
-//
-//        sellDialog.add(panel);
-//        sellDialog.pack();
-//        sellDialog.setVisible(true);
-//
-//        return result[0];
-//    }
+
+    public static double showWithdrawGUI(double currentBalance) {
+        JDialog withdrawDialog = new JDialog((JFrame)null, "Withdraw Funds", true);
+        withdrawDialog.setSize(300, 200);
+        withdrawDialog.setLocationRelativeTo(null);
+        withdrawDialog.setResizable(false);
+
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel balanceLabel = new JLabel("Current Balance:");
+        JLabel balanceValue = new JLabel("$" + String.format("%,.2f", currentBalance));
+        JLabel amountLabel = new JLabel("Withdraw Amount:");
+        JTextField amountField = new JTextField();
+
+        JButton withdrawBtn = new JButton("Withdraw");
+        JButton cancelBtn = new JButton("Cancel");
+
+        panel.add(balanceLabel);
+        panel.add(balanceValue);
+        panel.add(amountLabel);
+        panel.add(amountField);
+        panel.add(withdrawBtn);
+        panel.add(cancelBtn);
+
+        final double[] result = new double[]{-1}; // -1 means cancelled
+
+        withdrawBtn.addActionListener(e -> {
+            try {
+                double amount = Double.parseDouble(amountField.getText().trim());
+
+                if (amount <= 0) {
+                    JOptionPane.showMessageDialog(withdrawDialog, "Amount must be positive");
+                    return;
+                }
+
+                if (amount > currentBalance) {
+                    JOptionPane.showMessageDialog(withdrawDialog,
+                            String.format("Insufficient funds. You have $%,.2f", currentBalance));
+                    return;
+                }
+
+                result[0] = amount;
+                withdrawDialog.dispose();
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(withdrawDialog, "Please enter a valid amount");
+            }
+        });
+
+        cancelBtn.addActionListener(e -> {
+            withdrawDialog.dispose();
+        });
+
+        // Enter key support
+        amountField.addActionListener(e -> withdrawBtn.doClick());
+
+        withdrawDialog.add(panel);
+        withdrawDialog.pack();
+        withdrawDialog.setVisible(true);
+
+        return result[0];
+    }
+
+    public static double showDepositGUI(double currentBalance) {
+        JDialog depositDialog = new JDialog((JFrame)null, "Deposit Funds", true);
+        depositDialog.setSize(300, 200);
+        depositDialog.setLocationRelativeTo(null);
+        depositDialog.setResizable(false);
+
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel balanceLabel = new JLabel("Current Balance:");
+        JLabel balanceValue = new JLabel("$" + String.format("%,.2f", currentBalance));
+        JLabel amountLabel = new JLabel("Deposit Amount:");
+        JTextField amountField = new JTextField();
+
+        JButton depositBtn = new JButton("Deposit");
+        JButton cancelBtn = new JButton("Cancel");
+
+        panel.add(balanceLabel);
+        panel.add(balanceValue);
+        panel.add(amountLabel);
+        panel.add(amountField);
+        panel.add(depositBtn);
+        panel.add(cancelBtn);
+
+        final double[] result = new double[]{-1}; // -1 means cancelled
+
+        depositBtn.addActionListener(e -> {
+            try {
+                double amount = Double.parseDouble(amountField.getText().trim());
+
+                if (amount <= 0) {
+                    JOptionPane.showMessageDialog(depositDialog, "Amount must be positive");
+                    return;
+                }
+
+                if (amount > 1000000) {
+                    JOptionPane.showMessageDialog(depositDialog, "Deposit amount cannot exceed $1,000,000");
+                    return;
+                }
+
+                result[0] = amount;
+                depositDialog.dispose();
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(depositDialog, "Please enter a valid amount");
+            }
+        });
+
+        cancelBtn.addActionListener(e -> {
+            depositDialog.dispose();
+        });
+
+        // Enter key support
+        amountField.addActionListener(e -> depositBtn.doClick());
+
+        depositDialog.add(panel);
+        depositDialog.pack();
+        depositDialog.setVisible(true);
+
+        return result[0];
+    }
+
+    public double showSellCryptoGUI(Asset asset) {
+        JDialog sellDialog = new JDialog(mainFrame, "Sell " + asset.getSymbol(), true);
+        sellDialog.setSize(400, 350);
+        sellDialog.setLocationRelativeTo(mainFrame);
+        sellDialog.setResizable(false);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        double currentPrice = asset.getCurrentPrice();
+
+        // Info section
+        JPanel infoPanel = new JPanel(new GridLayout(4, 2, 10, 5));
+        infoPanel.setMaximumSize(new Dimension(380, 100));
+
+        JLabel symbolLabel = new JLabel("Cryptocurrency:");
+        JLabel symbolValue = new JLabel(asset.getName() + " (" + asset.getSymbol() + ")");
+
+        JLabel priceLabel = new JLabel("Current Price:");
+        JLabel priceValue = new JLabel("$" + String.format("%,.2f", currentPrice));
+
+        JLabel buyPriceLabel = new JLabel("Your Buy Price:");
+        JLabel buyPriceValue = new JLabel("$" + String.format("%,.2f", asset.getBuyPrice()));
+
+        JLabel ownedLabel = new JLabel("You Own:");
+        JLabel ownedValue = new JLabel(String.format("%.6f %s", asset.getAmount(), asset.getSymbol()));
+
+        infoPanel.add(symbolLabel);
+        infoPanel.add(symbolValue);
+        infoPanel.add(priceLabel);
+        infoPanel.add(priceValue);
+        infoPanel.add(buyPriceLabel);
+        infoPanel.add(buyPriceValue);
+        infoPanel.add(ownedLabel);
+        infoPanel.add(ownedValue);
+
+        // Slider section
+        JPanel sliderPanel = new JPanel();
+        sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS));
+        sliderPanel.setBorder(BorderFactory.createTitledBorder("Amount to Sell"));
+        sliderPanel.setMaximumSize(new Dimension(380, 120));
+
+        JSlider amountSlider = new JSlider(0, 100, 0); // 0% to 100%
+        amountSlider.setMajorTickSpacing(25);
+        amountSlider.setMinorTickSpacing(5);
+        amountSlider.setPaintTicks(true);
+        amountSlider.setPaintLabels(true);
+
+        JLabel sliderValue = new JLabel("0% - 0.000000 " + asset.getSymbol(), JLabel.CENTER);
+        sliderValue.setFont(new Font("Arial", Font.BOLD, 12));
+
+        // Manual input field
+        JPanel inputPanel = new JPanel(new FlowLayout());
+        JLabel amountLabel = new JLabel("Amount:");
+        JTextField amountField = new JTextField("0", 10);
+        inputPanel.add(amountLabel);
+        inputPanel.add(amountField);
+
+        sliderPanel.add(sliderValue);
+        sliderPanel.add(Box.createVerticalStrut(5));
+        sliderPanel.add(amountSlider);
+        sliderPanel.add(Box.createVerticalStrut(5));
+        sliderPanel.add(inputPanel);
+
+        // Profit display
+        JPanel profitPanel = new JPanel();
+        profitPanel.setBorder(BorderFactory.createTitledBorder("Sale Summary"));
+        profitPanel.setMaximumSize(new Dimension(380, 80));
+
+        JLabel proceedsLabel = new JLabel("You Receive: $0.00", JLabel.CENTER);
+        JLabel profitLabel = new JLabel("Profit: $0.00", JLabel.CENTER);
+        proceedsLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        profitLabel.setFont(new Font("Arial", Font.BOLD, 12));
+
+        JPanel profitLabels = new JPanel(new GridLayout(2, 1));
+        profitLabels.add(proceedsLabel);
+        profitLabels.add(profitLabel);
+        profitPanel.add(profitLabels);
+
+        // Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton sellBtn = new JButton("Sell");
+        JButton cancelBtn = new JButton("Cancel");
+        buttonPanel.add(sellBtn);
+        buttonPanel.add(cancelBtn);
+
+        // Add all panels
+        panel.add(infoPanel);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(sliderPanel);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(profitPanel);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(buttonPanel);
+
+        final double[] result = new double[]{-1}; // -1 means cancelled
+
+        // Update function
+        Runnable updateValues = () -> {
+            try {
+                String amountText = amountField.getText().trim();
+                if (amountText.isEmpty()) {
+                    amountField.setText("0");
+                    return;
+                }
+
+                double amount = Double.parseDouble(amountText);
+
+                // Handle very small amounts
+                if (amount > 0 && amount < 0.000001) {
+                    amount = 0.000001;
+                    amountField.setText(String.format("%.6f", amount));
+                }
+
+                // Ensure we don't exceed owned amount
+                if (amount > asset.getAmount()) {
+                    amount = asset.getAmount();
+                    amountField.setText(String.format("%.6f", amount));
+                }
+
+                double totalValue = amount * currentPrice;
+                double realizedProfit = (currentPrice - asset.getBuyPrice()) * amount;
+                double percentage = (amount / asset.getAmount()) * 100;
+
+                // Update labels
+                sliderValue.setText(String.format("%.1f%% - %.6f %s", percentage, amount, asset.getSymbol()));
+                proceedsLabel.setText(String.format("You Receive: $%,.2f", totalValue));
+                profitLabel.setText(String.format("Profit: $%,.2f", realizedProfit));
+
+                // Color code profit
+                if (realizedProfit >= 0) {
+                    profitLabel.setForeground(Color.GREEN);
+                } else {
+                    profitLabel.setForeground(Color.RED);
+                }
+
+                sellBtn.setEnabled(amount > 0);
+
+            } catch (NumberFormatException ex) {
+                amountField.setText("0");
+                proceedsLabel.setText("You Receive: $0.00");
+                profitLabel.setText("Profit: $0.00");
+                profitLabel.setForeground(Color.BLACK);
+                sellBtn.setEnabled(false);
+            }
+        };
+
+        // Slider listener
+        amountSlider.addChangeListener(e -> {
+            if (!amountSlider.getValueIsAdjusting()) {
+                SwingUtilities.invokeLater(() -> {
+                    double percentage = amountSlider.getValue();
+                    double amount = asset.getAmount() * (percentage / 100.0);
+
+                    // Ensure minimum amount
+                    if (percentage > 0 && amount < 0.000001) {
+                        amount = 0.000001;
+                    }
+
+                    amountField.setText(String.format("%.6f", amount));
+                    updateValues.run();
+                });
+            }
+        });
+
+        // Text field listener
+        amountField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                SwingUtilities.invokeLater(() -> updateValues.run());
+            }
+            public void removeUpdate(DocumentEvent e) {
+                SwingUtilities.invokeLater(() -> updateValues.run());
+            }
+            public void insertUpdate(DocumentEvent e) {
+                SwingUtilities.invokeLater(() -> updateValues.run());
+            }
+        });
+
+        sellBtn.addActionListener(e -> {
+            try {
+                double amount = Double.parseDouble(amountField.getText().trim());
+
+                if (amount <= 0) {
+                    JOptionPane.showMessageDialog(sellDialog, "Amount must be positive");
+                    return;
+                }
+
+                if (amount > asset.getAmount()) {
+                    JOptionPane.showMessageDialog(sellDialog,
+                            String.format("You only own %.6f %s", asset.getAmount(), asset.getSymbol()));
+                    return;
+                }
+
+                // Confirm sale
+                double totalValue = amount * currentPrice;
+                double realizedProfit = (currentPrice - asset.getBuyPrice()) * amount;
+
+                int confirm = JOptionPane.showConfirmDialog(sellDialog,
+                        String.format("Sale Summary:\nAsset: %s (%s)\nAmount: %.6f\nSell Price: $%,.2f\nYou Receive: $%,.2f\nProfit: $%,.2f\n\nConfirm sale?",
+                                asset.getName(), asset.getSymbol(), amount, currentPrice, totalValue, realizedProfit),
+                        "Confirm Sale",
+                        JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    result[0] = amount;
+                    sellDialog.dispose();
+                }
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(sellDialog, "Please enter a valid amount");
+            }
+        });
+
+        cancelBtn.addActionListener(e -> {
+            sellDialog.dispose();
+        });
+
+        // Initialize
+        updateValues.run();
+
+        sellDialog.add(panel);
+        sellDialog.pack();
+        sellDialog.setVisible(true);
+
+        return result[0];
+    }
     private void setupResizeListener() {
         mainFrame.addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override
@@ -1644,6 +1580,20 @@ private JPanel createActionButtons() {
     public void setCurrentUser(User user){
         currentUser = user;
     }
+    public String getBuyChoice(){
+        return buyChoice;
+    }
+
+    public Asset getCurrentAsset() {
+        return currentAsset;
+    }
+    public String getCurrentSortBy(){
+        return currentSortBy;
+    }
+    public String getCurrentSortDirection(){
+        return currentSortDirection;
+    }
+
     public static CryptoManagerGUI getInstance() {
         if(instance == null) {
             instance = new CryptoManagerGUI();
