@@ -9,7 +9,7 @@ public class AuthManager {
 
     // Private constructor to prevent instantiation
     private AuthManager() {
-        cryptoManagerGUI = CryptoManagerGUI.getInstance();
+
     }
 
     public User login(LoginAttempt loginAttempt) {

@@ -10,6 +10,7 @@ public class CryptoManager {
     private Scanner scanner;
     private static CryptoManager instance;
     private AuthManager authManager;
+    private MarketManager marketManager;
     private UserRepository userRepository;
     private AssetFactory assetFactory;
     private CryptoManagerGUI cryptoManagerGUI;
@@ -18,7 +19,8 @@ public class CryptoManager {
         authManager = AuthManager.getInstance();
         assetFactory = AssetFactory.getInstance();
         userRepository = UserRepository.getInstance();
-        cryptoManagerGUI = CryptoManagerGUI.getInstance();
+        marketManager = MarketManager.getInstance();
+        cryptoManagerGUI = CryptoManagerGUI.getInstance(marketManager);
     }
 
     public void start() {
@@ -110,6 +112,7 @@ public class CryptoManager {
     }
 
     private void handleLogin() {
+        System.out.println(marketManager.getAllPrices().size());
         boolean loggedIn = false;
         LoginAttempt lastAttempt = null;
 
@@ -247,7 +250,7 @@ public class CryptoManager {
 
     public void buyCrypto() {
         String symbol = cryptoManagerGUI.getBuyChoice();
-        double currentPrice = MarketManager.getCurrentPrice(symbol);
+        double currentPrice = marketManager.getCurrentPrice(symbol);
         double amount = cryptoManagerGUI.showBuyCryptoGUI(symbol, currentPrice, currentUser.getBalance());
         if(amount <= 0)
             return;
@@ -363,10 +366,10 @@ public class CryptoManager {
         System.out.println("\n--- Market Prices ---");
 
         // Update all asset prices using static method
-        MarketManager.updateMarketPrices();
+        marketManager.updateMarketPrices();
 
         // Display current prices
-        Map<String, Double> marketPrices = MarketManager.getAllPrices();
+        Map<String, Double> marketPrices = marketManager.getAllPrices();
         System.out.println("Current Market Prices:");
         System.out.println("======================");
 

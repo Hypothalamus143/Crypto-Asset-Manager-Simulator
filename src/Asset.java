@@ -5,6 +5,7 @@ public abstract class Asset implements Comparable<Asset>{
     protected String name;
     protected String symbol;
     protected double buyPrice;  // Instance-specific
+    private MarketManager marketManager;
     protected double amount;    // Instance-specific
     // REMOVED: currentPrice (will use MarketManager)
 
@@ -13,6 +14,7 @@ public abstract class Asset implements Comparable<Asset>{
         this.symbol = symbol;
         this.buyPrice = buyPrice;
         this.amount = amount;
+        marketManager = MarketManager.getInstance();
     }
 
     // Getters
@@ -23,7 +25,7 @@ public abstract class Asset implements Comparable<Asset>{
 
     // Current price comes from MarketManager (class-level)
     public double getCurrentPrice() {
-        return MarketManager.getCurrentPrice(symbol);
+        return marketManager.getCurrentPrice(symbol);
     }
 
     // Setters

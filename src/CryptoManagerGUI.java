@@ -18,7 +18,7 @@ public class CryptoManagerGUI {
     private String currentSortBy = "Symbol";
     private Asset currentAsset;
     private String currentSortDirection = "Ascending";
-
+    private MarketManager marketManager;
     // Panel constants
     private final String LANDING_PANEL = "LANDING";
     private final String PORTFOLIO_PANEL = "PORTFOLIO";
@@ -47,7 +47,8 @@ public class CryptoManagerGUI {
     private final Object choiceLock = new Object();
 
 
-    public CryptoManagerGUI() {
+    public CryptoManagerGUI(MarketManager marketManager) {
+        this.marketManager = marketManager;
         initializeGUI();
     }
 
@@ -546,7 +547,7 @@ public LoginAttempt showLoginGUI() {
         gbc.gridwidth = GridBagConstraints.REMAINDER; // Take full width
 
         // Get current market prices
-        Map<String, Double> marketPrices = MarketManager.getAllPrices();
+        Map<String, Double> marketPrices = marketManager.getAllPrices();
 
         if (marketPrices.isEmpty()) {
             JLabel emptyLabel = new JLabel("No market data available", JLabel.CENTER);
@@ -597,7 +598,7 @@ public LoginAttempt showLoginGUI() {
         pricePanel.setBorder(BorderFactory.createEtchedBorder());
         pricePanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        String assetName = MarketManager.getCryptoName(symbol);
+        String assetName = marketManager.getCryptoName(symbol);
         JLabel symbolLabel = new JLabel(assetName + " (" + symbol + ")");
         JLabel priceLabel = new JLabel("$" + String.format("%,.2f", price));
 
@@ -640,7 +641,7 @@ public LoginAttempt showLoginGUI() {
 
         chartContainer.removeAll();
 
-        List<Double> priceHistory = MarketManager.getPriceHistory(symbol);
+        List<Double> priceHistory = marketManager.getPriceHistory(symbol);
 
         if (priceHistory.isEmpty()) {
             chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
@@ -665,7 +666,7 @@ public LoginAttempt showLoginGUI() {
 
         // Update title
         chartContainer.setBorder(BorderFactory.createTitledBorder(
-                MarketManager.getCryptoName(symbol) + " (" + symbol + ") Price Chart"));
+                marketManager.getCryptoName(symbol) + " (" + symbol + ") Price Chart"));
 
         chartContainer.revalidate();
         chartContainer.repaint();
@@ -1594,9 +1595,9 @@ public void showPortfolioPanel() {
         return currentSortDirection;
     }
 
-    public static CryptoManagerGUI getInstance() {
+    public static CryptoManagerGUI getInstance(MarketManager marketManager) {
         if(instance == null) {
-            instance = new CryptoManagerGUI();
+            instance = new CryptoManagerGUI(marketManager);
         }
         return instance;
     }

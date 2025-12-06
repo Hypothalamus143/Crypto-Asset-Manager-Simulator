@@ -2,22 +2,23 @@ import java.io.*;
 import java.util.*;
 
 public class MarketManager {
-    private static final String MARKET_FILE = "data/market_prices.csv";
-    private static final Map<String, String> cryptoNames = new HashMap<>();
-    private static final Map<String, List<Double>> priceHistory = new HashMap<>();
-    private static final Map<String, Double> currentPrices = new HashMap<>();
-    private static final int MAX_PRICES = 100;
+    private final String MARKET_FILE = "data/market_prices.csv";
+    private static MarketManager instance;
+    private final Map<String, String> cryptoNames = new HashMap<>();
+    private final Map<String, List<Double>> priceHistory = new HashMap<>();
+    private final Map<String, Double> currentPrices = new HashMap<>();
+    private final int MAX_PRICES = 100;
 
-    static {
+    private MarketManager(){
         cryptoNames.put("BTC", "Bitcoin");
         cryptoNames.put("ETH", "Ethereum");
         cryptoNames.put("SOL", "Solana");
         loadMarketPrices();
+        for(int i = currentPrices.size(); i < 23; i++)
+            updateMarketPrices();
     }
 
-    private MarketManager() {}
-
-    private static void loadMarketPrices() {
+    private void loadMarketPrices() {
         File marketFile = new File(MARKET_FILE);
 
         if (!marketFile.exists()) {
@@ -66,7 +67,7 @@ public class MarketManager {
         }
     }
 
-    private static List<Double> parsePriceArray(String jsonArray) {
+    private List<Double> parsePriceArray(String jsonArray) {
         List<Double> prices = new ArrayList<>();
 
         try {
@@ -95,7 +96,7 @@ public class MarketManager {
         return prices;
     }
 
-    private static String formatPriceArray(List<Double> prices) {
+    private String formatPriceArray(List<Double> prices) {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < prices.size(); i++) {
             sb.append(String.format("%.2f", prices.get(i)));
@@ -107,13 +108,13 @@ public class MarketManager {
         return sb.toString();
     }
 
-    private static void createDefaultMarketFile() {
+    private void createDefaultMarketFile() {
         new File("data").mkdirs();
         initializeDefaultPrices();
         saveMarketPrices();
     }
 
-    private static void initializeDefaultPrices() {
+    private void initializeDefaultPrices() {
         for (String symbol : cryptoNames.keySet()) {
             List<Double> prices = new ArrayList<>();
             double initialPrice = getDefaultPrice(symbol);
@@ -124,7 +125,7 @@ public class MarketManager {
         }
     }
 
-    private static double getDefaultPrice(String symbol) {
+    private double getDefaultPrice(String symbol) {
         switch (symbol) {
             case "BTC": return 45000.00;
             case "ETH": return 3200.00;
@@ -134,7 +135,7 @@ public class MarketManager {
     }
 
     // PUBLIC STATIC METHODS
-    public static void updateMarketPrices() {
+    public  void updateMarketPrices() {
         for (String symbol : currentPrices.keySet()) {
             double currentPrice = currentPrices.get(symbol);
             double newPrice = calculateNewPrice(symbol, currentPrice);
@@ -156,7 +157,7 @@ public class MarketManager {
         saveMarketPrices();
     }
 
-    private static double calculateNewPrice(String symbol, double currentPrice) {
+    private  double calculateNewPrice(String symbol, double currentPrice) {
         double changePercent;
 
         switch (symbol) {
@@ -177,7 +178,7 @@ public class MarketManager {
         return Math.round(newPrice * 100.0) / 100.0;
     }
 
-    private static void saveMarketPrices() {
+    private  void saveMarketPrices() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(MARKET_FILE))) {
             writer.write("symbol,name,price_history");
             writer.newLine();
@@ -195,27 +196,31 @@ public class MarketManager {
         }
     }
 
-    public static double getCurrentPrice(String symbol) {
+    public double getCurrentPrice(String symbol) {
         return currentPrices.getOrDefault(symbol.toUpperCase(), 0.0);
     }
 
-    public static List<String> getAvailableSymbols() {
+    public List<String> getAvailableSymbols() {
         return new ArrayList<>(currentPrices.keySet());
     }
 
-    public static Map<String, Double> getAllPrices() {
+    public Map<String, Double> getAllPrices() {
         return new HashMap<>(currentPrices);
     }
 
-    public static List<Double> getPriceHistory(String symbol) {
+    public List<Double> getPriceHistory(String symbol) {
         return new ArrayList<>(priceHistory.getOrDefault(symbol, new ArrayList<>()));
     }
 
-    public static String getCryptoName(String symbol) {
+    public String getCryptoName(String symbol) {
         return cryptoNames.getOrDefault(symbol, "Unknown");
     }
-
-    public static int getHistorySize(String symbol) {
+    public static MarketManager getInstance(){
+        if(instance == null)
+            return new MarketManager();
+        return instance;
+    }
+    public int getHistorySize(String symbol) {
         List<Double> history = priceHistory.get(symbol);
         return history != null ? history.size() : 0;
     }
