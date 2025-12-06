@@ -15,19 +15,112 @@ public class CryptoManager {
     private CryptoManagerGUI cryptoManagerGUI;
     private CryptoManager() {
         this.scanner = new Scanner(System.in);
+        authManager = AuthManager.getInstance();
         assetFactory = AssetFactory.getInstance();
         userRepository = UserRepository.getInstance();
         cryptoManagerGUI = CryptoManagerGUI.getInstance();
     }
 
     public void start() {
-        // Launch GUI instead of terminal interface
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                cryptoManagerGUI.show();
+        int choice;
+
+        do {
+            choice = cryptoManagerGUI.getLandingChoice();
+
+            switch(choice) {
+                case 1: // Login
+                    handleLogin();
+                    break;
+                case 2: // Create Account
+                    handleCreateAccount();
+                    break;
+                case 3: // Exit
+                    handleExit();
+                    break;
             }
-        });
+        } while (choice != 3);
+    }
+
+    private void handleExit() {
+        // Ask for confirmation
+        int confirm = JOptionPane.showConfirmDialog(null,
+                "Are you sure you want to exit Crypto Portfolio Manager?",
+                "Confirm Exit",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            System.out.println("Exiting Crypto Portfolio Manager...");
+
+            // Show closing message
+            JOptionPane.showMessageDialog(null,
+                    "Thank you for using Crypto Portfolio Manager!\nGoodbye!",
+                    "Goodbye",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            // Close GUI gracefully
+            cryptoManagerGUI.close();
+
+            // Exit application
+            System.exit(0);
+        } else {
+            System.out.println("Exit cancelled by user");
+            // Loop continues, showing landing choice again
+        }
+    }
+
+    private void handleLogin() {
+        boolean loggedIn = false;
+        LoginAttempt lastAttempt = null;
+
+        while (!loggedIn) {
+            // Show login GUI with previous attempt values
+            LoginAttempt loginAttempt = cryptoManagerGUI.showLoginGUI(lastAttempt);
+
+            if (loginAttempt == null) {
+                // User cancelled
+                System.out.println("Login cancelled");
+                break;
+            }
+
+            // Store attempt for potential retry (with all values preserved)
+            lastAttempt = loginAttempt;
+
+            User user = authManager.login(loginAttempt);
+
+            if (user != null) {
+                currentUser = user;
+                loggedIn = true;
+                //cryptoManagerGUI.showPortfolioPanel(currentUser);
+            }
+            // If login fails, loop continues with all values preserved
+        }
+    }
+
+    private void handleCreateAccount() {
+        boolean accountCreated = false;
+        CreateAccountRequest lastRequest = null;
+
+        while (!accountCreated) {
+            // Show create account GUI with previous request values
+            CreateAccountRequest request = cryptoManagerGUI.showCreateAccountGUI(lastRequest);
+
+            if (request == null) {
+                // User cancelled
+                System.out.println("Account creation cancelled");
+                break;
+            }
+
+            // Store request for potential retry (with all values preserved)
+            lastRequest = request;
+
+            accountCreated = authManager.createAccount(request);
+
+            if (accountCreated) {
+                System.out.println("Account created successfully!");
+            }
+            // If creation fails, loop continues with all values preserved
+        }
     }
 
     private void showMainMenu() {
@@ -255,47 +348,47 @@ public class CryptoManager {
         System.out.println("These new prices will be used for any new purchases.");
     }
 
-    void deposit() {
-        double amount = CryptoManagerGUI.showDepositGUI(currentUser.getBalance());
-
-        if (amount > 0) {
-            // Execute the deposit
-            double oldBalance = currentUser.getBalance();
-            double newBalance = oldBalance + amount;
-            currentUser.setBalance(newBalance);
-
-            System.out.printf("Successfully deposited $%.2f\n", amount);
-            System.out.printf("Old balance: $%.2f\n", oldBalance);
-            System.out.printf("New balance: $%.2f\n", newBalance);
-            userRepository.saveUserData(currentUser, null);
-
-            JOptionPane.showMessageDialog(null,
-                    String.format("Deposited $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
-                    "Deposit Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-    void withdraw() {
-        double amount = CryptoManagerGUI.showWithdrawGUI(currentUser.getBalance());
-
-        if (amount > 0) {
-            // Execute the withdrawal
-            double oldBalance = currentUser.getBalance();
-            double newBalance = oldBalance - amount;
-            currentUser.setBalance(newBalance);
-
-            System.out.printf("Successfully withdrew $%.2f\n", amount);
-            System.out.printf("Old balance: $%.2f\n", oldBalance);
-            System.out.printf("New balance: $%.2f\n", newBalance);
-            userRepository.saveUserData(currentUser, null);
-
-            JOptionPane.showMessageDialog(null,
-                    String.format("Withdrew $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
-                    "Withdrawal Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
+//    void deposit() {
+//        double amount = CryptoManagerGUI.showDepositGUI(currentUser.getBalance());
+//
+//        if (amount > 0) {
+//            // Execute the deposit
+//            double oldBalance = currentUser.getBalance();
+//            double newBalance = oldBalance + amount;
+//            currentUser.setBalance(newBalance);
+//
+//            System.out.printf("Successfully deposited $%.2f\n", amount);
+//            System.out.printf("Old balance: $%.2f\n", oldBalance);
+//            System.out.printf("New balance: $%.2f\n", newBalance);
+//            userRepository.saveUserData(currentUser, null);
+//
+//            JOptionPane.showMessageDialog(null,
+//                    String.format("Deposited $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
+//                    "Deposit Successful",
+//                    JOptionPane.INFORMATION_MESSAGE);
+//        }
+//    }
+//
+//    void withdraw() {
+//        double amount = CryptoManagerGUI.showWithdrawGUI(currentUser.getBalance());
+//
+//        if (amount > 0) {
+//            // Execute the withdrawal
+//            double oldBalance = currentUser.getBalance();
+//            double newBalance = oldBalance - amount;
+//            currentUser.setBalance(newBalance);
+//
+//            System.out.printf("Successfully withdrew $%.2f\n", amount);
+//            System.out.printf("Old balance: $%.2f\n", oldBalance);
+//            System.out.printf("New balance: $%.2f\n", newBalance);
+//            userRepository.saveUserData(currentUser, null);
+//
+//            JOptionPane.showMessageDialog(null,
+//                    String.format("Withdrew $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
+//                    "Withdrawal Successful",
+//                    JOptionPane.INFORMATION_MESSAGE);
+//        }
+//    }
     public UserRepository getUserRepository(){
         return userRepository;
     }
