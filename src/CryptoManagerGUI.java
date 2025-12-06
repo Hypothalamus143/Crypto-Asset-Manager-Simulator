@@ -28,7 +28,15 @@ public class CryptoManagerGUI {
     private JPanel chartContainer;
     private String currentChartSymbol = "BTC";
 
+    // Portfolio choice variables
+    private int portfolioChoice = 0;
+    private final Object portfolioChoiceLock = new Object();
     // Add these instance variables:
+    // Add these constants:
+    public static final int PORTFOLIO_DEPOSIT = 5;
+    public static final int PORTFOLIO_WITHDRAW = 6;
+    public static final int PORTFOLIO_LOGOUT = 8;
+
     private int landingChoice = 0;
     private final Object choiceLock = new Object();
 
@@ -152,33 +160,6 @@ public class CryptoManagerGUI {
         cardLayout.show(mainPanel, LANDING_PANEL);
     }
 
-//    private void handleLogin() {
-//        User user = authManager.login();
-//        if (user != null) {
-//            cryptoManager.setCurrentUser(user);
-//            showPortfolioPanel(user); // Switch to portfolio panel
-//        }
-//    }
-//
-//
-//    private void handleCreateAccount() {
-//        // Call the AuthManager.createAccount() method directly
-//        boolean success = authManager.createAccount();
-//        if (success) {
-//            JOptionPane.showMessageDialog(mainFrame,
-//                    "Account created successfully! Please login.",
-//                    "Success",
-//                    JOptionPane.INFORMATION_MESSAGE);
-//        }
-//
-//        // Show the GUI again
-//        mainFrame.setVisible(true);
-//    }
-//
-//
-
-//
-//
 // Change return type from User to LoginAttempt
 // Login GUI with preserved values on retry
 public LoginAttempt showLoginGUI() {
@@ -723,20 +704,20 @@ public LoginAttempt showLoginGUI() {
 //        chartContainer.repaint();
 //    }
 //
-//    private JPanel createPortfolioHeader() {
-//        JPanel headerPanel = new JPanel(new BorderLayout());
-//
-//        JLabel welcomeLabel = new JLabel("Welcome, " + cryptoManager.getCurrentUser().getUsername() + "!");
-//        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 18));
-//
-//        JButton logoutButton = new JButton("Logout");
-//        logoutButton.addActionListener(e -> handleLogout());
-//
-//        headerPanel.add(welcomeLabel, BorderLayout.WEST);
-//        headerPanel.add(logoutButton, BorderLayout.EAST);
-//
-//        return headerPanel;
-//    }
+    private JPanel createPortfolioHeader() {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+
+        //JLabel welcomeLabel = new JLabel("Welcome, " + cryptoManager.getCurrentUser().getUsername() + "!");
+        //welcomeLabel.setFont(new Font("Arial", Font.BOLD, 18));
+
+        JButton logoutButton = new JButton("Logout");
+        //logoutButton.addActionListener(e -> handleLogout());
+
+        //headerPanel.add(welcomeLabel, BorderLayout.WEST);
+        headerPanel.add(logoutButton, BorderLayout.EAST);
+
+        return headerPanel;
+    }
 //
 //    private JPanel createSummaryPanel() {
 //        JPanel summaryPanel = new JPanel(new GridLayout(2, 3, 10, 5));
@@ -1024,21 +1005,27 @@ public LoginAttempt showLoginGUI() {
 //
 //        return assetsContainer;
 //    }
-//    private JPanel createActionButtons() {
-//        JPanel buttonPanel = new JPanel(new FlowLayout());
-//
-//        JButton depositButton = new JButton("Deposit");
-//        JButton withdrawButton = new JButton("Withdraw");
-//
-//        // Add action listeners (to be implemented)
-//        depositButton.addActionListener(e -> handleDeposit());
-//        withdrawButton.addActionListener(e -> handleWithdraw());
-//
-//        buttonPanel.add(depositButton);
-//        buttonPanel.add(withdrawButton);
-//
-//        return buttonPanel;
-//    }
+private JPanel createActionButtons() {
+    JPanel buttonPanel = new JPanel(new FlowLayout());
+
+    JButton depositButton = new JButton("Deposit");
+    JButton withdrawButton = new JButton("Withdraw");
+
+    // Deposit button - notify choice
+    depositButton.addActionListener(e -> {
+        notifyPortfolioChoice(PORTFOLIO_DEPOSIT); // Notify that deposit was clicked
+    });
+
+    // Withdraw button - notify choice
+    withdrawButton.addActionListener(e -> {
+        notifyPortfolioChoice(PORTFOLIO_WITHDRAW); // Notify that withdraw was clicked
+    });
+
+    buttonPanel.add(depositButton);
+    buttonPanel.add(withdrawButton);
+
+    return buttonPanel;
+}
 //
 //    private void refreshAssetsList(JPanel assetsPanel) {
 //        assetsPanel.removeAll();
@@ -1178,17 +1165,19 @@ public LoginAttempt showLoginGUI() {
 //    }
 //
 //
-//    public void showPortfolioPanel(User user) {
-//        // Always create a fresh portfolio panel
-//        JPanel portfolioPanel = createPortfolioPanel();
-//
-//        // Remove existing portfolio panel if any
-//        Component[] comps = mainPanel.getComponents();
-//        for (Component comp : comps) {
-//            if (comp.getName() != null && comp.getName().equals(PORTFOLIO_PANEL)) {
-//                mainPanel.remove(comp);
-//            }
-//        }
+    public void showPortfolioPanel(User user) {
+        // Always create a fresh portfolio panel
+        JPanel portfolioPanel = createPortfolioPanel();
+
+        // Remove existing portfolio panel if any
+        Component[] comps = mainPanel.getComponents();
+        for (Component comp : comps) {
+            if (comp.getName() != null && comp.getName().equals(PORTFOLIO_PANEL)) {
+                mainPanel.remove(comp);
+            }
+        }
+    }
+
 //
 //        portfolioPanel.setName(PORTFOLIO_PANEL);
 //        mainPanel.add(portfolioPanel, PORTFOLIO_PANEL);
@@ -1197,21 +1186,21 @@ public LoginAttempt showLoginGUI() {
 //        // No refresh needed - panel is created fresh with latest data
 //    }
 //
-//    private JPanel createPortfolioPanel() {
-//        JPanel portfolioPanel = new JPanel(new BorderLayout(10, 10));
-//        portfolioPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-//
-//        // Header with user info and logout
-//        portfolioPanel.add(createPortfolioHeader(), BorderLayout.NORTH);
-//
-//        // Main content - portfolio summary and assets
-//        portfolioPanel.add(createPortfolioContent(), BorderLayout.CENTER);
-//
-//        // Action buttons at bottom
-//        portfolioPanel.add(createActionButtons(), BorderLayout.SOUTH);
-//
-//        return portfolioPanel;
-//    }
+    private JPanel createPortfolioPanel() {
+        JPanel portfolioPanel = new JPanel(new BorderLayout(10, 10));
+        portfolioPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Header with user info and logout
+        portfolioPanel.add(createPortfolioHeader(), BorderLayout.NORTH);
+
+        // Main content - portfolio summary and assets
+        portfolioPanel.add(createPortfolioContent(), BorderLayout.CENTER);
+
+        // Action buttons at bottom
+        portfolioPanel.add(createActionButtons(), BorderLayout.SOUTH);
+
+        return portfolioPanel;
+    }
 //
 //    public static double showWithdrawGUI(double currentBalance) {
 //        JDialog withdrawDialog = new JDialog((JFrame)null, "Withdraw Funds", true);
@@ -1600,6 +1589,35 @@ public LoginAttempt showLoginGUI() {
         }
 
         System.out.println("GUI closed successfully.");
+    }
+
+    // Method to get portfolio choice (blocks until user clicks)
+    public int getPortfolioChoice() {
+        portfolioChoice = 0; // Reset
+
+        // Wait for user to click a button
+        synchronized(portfolioChoiceLock) {
+            while (portfolioChoice == 0) {
+                try {
+                    portfolioChoiceLock.wait(); // Blocks here
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return PORTFOLIO_LOGOUT;
+                }
+            }
+        }
+
+        int choice = portfolioChoice;
+        portfolioChoice = 0; // Reset for next time
+        return choice;
+    }
+
+    // Helper method for buttons to notify choice
+    private void notifyPortfolioChoice(int choice) {
+        synchronized(portfolioChoiceLock) {
+            portfolioChoice = choice;
+            portfolioChoiceLock.notifyAll();
+        }
     }
 
     public static CryptoManagerGUI getInstance() {

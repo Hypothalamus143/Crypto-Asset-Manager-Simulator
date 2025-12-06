@@ -41,6 +41,42 @@ public class CryptoManager {
         } while (choice != 3);
     }
 
+    private void runPortfolioManager() {
+        System.out.println("\n=== Portfolio Manager Started ===");
+        System.out.println("Welcome, " + currentUser.getUsername() + "!");
+
+        boolean inPortfolio = true;
+
+        while (inPortfolio) {
+            // Get portfolio choice from GUI (this blocks)
+            int choice = cryptoManagerGUI.getPortfolioChoice();
+
+            System.out.println("DEBUG: Received portfolio choice: " + choice);
+
+            switch (choice) {
+                case CryptoManagerGUI.PORTFOLIO_DEPOSIT: // 5
+                    System.out.println("DEBUG: Deposit flow completed in GUI");
+                    System.out.println("Current balance: $" + currentUser.getBalance());
+                    break;
+
+                case CryptoManagerGUI.PORTFOLIO_WITHDRAW: // 6
+                    System.out.println("DEBUG: Withdraw flow completed in GUI");
+                    System.out.println("Current balance: $" + currentUser.getBalance());
+                    break;
+
+                case CryptoManagerGUI.PORTFOLIO_LOGOUT: // 8
+                    System.out.println("DEBUG: Logging out...");
+                    inPortfolio = false;
+                    break;
+
+                default:
+                    System.out.println("DEBUG: Unknown portfolio choice: " + choice);
+            }
+        }
+
+        System.out.println("=== Returning to main menu ===");
+    }
+
     private void handleExit() {
         // Ask for confirmation
         int confirm = JOptionPane.showConfirmDialog(null,
@@ -91,7 +127,7 @@ public class CryptoManager {
             if (user != null) {
                 currentUser = user;
                 loggedIn = true;
-                //cryptoManagerGUI.showPortfolioPanel(currentUser);
+                runPortfolioManager();
             }
             // If login fails, loop continues with all values preserved
         }
