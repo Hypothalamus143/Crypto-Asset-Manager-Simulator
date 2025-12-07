@@ -4,13 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="more oop">
+    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="even more oop">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/assetmetadata.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/assetmetadata.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AssetFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AssetFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AssetMetadata.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AssetMetadata.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AssetRegistry.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AssetRegistry.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BitcoinMetadata.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BitcoinMetadata.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/EthereumMetadata.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/EthereumMetadata.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CryptoManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CryptoManagerGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManagerGUI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MarketManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/MarketManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -169,7 +169,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765091243069</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="even more oop">
+      <option name="closed" value="true" />
+      <created>1765092409705</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1765092409705</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -197,6 +205,7 @@
     <MESSAGE value="check market prices gui added" />
     <MESSAGE value="bugs and confirm password added" />
     <MESSAGE value="more oop" />
-    <option name="LAST_COMMIT_MESSAGE" value="more oop" />
+    <MESSAGE value="even more oop" />
+    <option name="LAST_COMMIT_MESSAGE" value="even more oop" />
   </component>
 </project>

@@ -17,8 +17,8 @@ public final class AssetRegistry {
 
     // ========== CSV SAVE/LOAD ==========
 
-    public  void saveToCSV() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE))) {
+    public void saveToCSV() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE, false))) {  // false = overwrite
             // Write header
             writer.write("symbol,name,description,category,priceChangeRange,priceChangeOffset,defaultPrice,currentPrice,priceHistory");
             writer.newLine();
@@ -160,7 +160,7 @@ public final class AssetRegistry {
 
     // ========== REGISTRY METHODS ==========
 
-    public  void register(AssetMetadata metadata) {
+    public  boolean register(AssetMetadata metadata) {
         if (metadata == null) {
             throw new IllegalArgumentException("Metadata cannot be null");
         }
@@ -169,11 +169,14 @@ public final class AssetRegistry {
         String symbol = metadata.getSymbol();
         if (get(symbol) != null) {
             System.out.println("Symbol already registered: " + symbol);
+            return false;
             //throw new IllegalArgumentException("Symbol already registered: " + symbol);
         }
 
         registeredMetadata.add(metadata);
+        System.out.println("Successfully registered " + symbol);
         saveToCSV(); // Auto-save after registration
+        return true;
     }
 
     public  AssetMetadata get(String symbol) {
@@ -280,7 +283,7 @@ public final class AssetRegistry {
     }
     public static AssetRegistry getInstance(){
         if(instance == null)
-            return new AssetRegistry();
+            instance = new AssetRegistry();
         return instance;
     }
 }

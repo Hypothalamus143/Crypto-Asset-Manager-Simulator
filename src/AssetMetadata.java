@@ -36,23 +36,6 @@ public class AssetMetadata {
         this.priceHistory = new ArrayList<>(newPriceHistory);
         this.currentPrice = newPriceHistory.get(newPriceHistory.size() - 1);
     }
-
-    // Add method to update price and record history
-    public void updatePrice(double newPrice) {
-        this.currentPrice = newPrice;
-        this.priceHistory.add(newPrice);
-    }
-
-    // Add method to append multiple prices (for batch updates)
-    public void appendPriceHistory(List<Double> additionalPrices) {
-        if (additionalPrices != null) {
-            this.priceHistory.addAll(additionalPrices);
-            if (!additionalPrices.isEmpty()) {
-                this.currentPrice = additionalPrices.get(additionalPrices.size() - 1);
-            }
-        }
-    }
-
     // Getter for price history
     public List<Double> getPriceHistory() {
         return new ArrayList<>(priceHistory);  // Return defensive copy

@@ -41,6 +41,7 @@ public class CryptoManagerGUI {
     public static final int PORTFOLIO_WITHDRAW = 6;
     public static final int PORTFOLIO_SORT = 7;
     public static final int PORTFOLIO_LOGOUT = 8;
+    public static final int PORTFOLIO_REGISTER_CRYPTO = 9;
     private User currentUser;
     private String buyChoice = "";
     private int landingChoice = 0;
@@ -577,14 +578,24 @@ public LoginAttempt showLoginGUI() {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        // Add refresh button at the bottom
-        JPanel bottomPanel = new JPanel();
+        // Add refresh button AND register crypto button at the bottom
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+
         JButton refreshButton = new JButton("Refresh Prices");
+        JButton registerCryptoButton = new JButton("Register Crypto");
+
         refreshButton.addActionListener(e -> {
             System.out.println("GUI: Refresh Prices button clicked");
             notifyPortfolioChoice(PORTFOLIO_REFRESH_PRICES);
         });
+
+        registerCryptoButton.addActionListener(e -> {
+            System.out.println("GUI: Register Crypto button clicked");
+            notifyPortfolioChoice(PORTFOLIO_REGISTER_CRYPTO);
+        });
+
         bottomPanel.add(refreshButton);
+        bottomPanel.add(registerCryptoButton);
 
         marketPanel.add(scrollPane, BorderLayout.CENTER);
         marketPanel.add(bottomPanel, BorderLayout.SOUTH);
@@ -1512,6 +1523,178 @@ public void showPortfolioPanel() {
         sellDialog.setVisible(true);
 
         return result[0];
+    }
+    // Add this method to show the register crypto dialog
+    public AssetMetadata showRegisterCryptoGUI() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Required fields
+        JTextField symbolField = new JTextField(20);
+        JTextField nameField = new JTextField(20);
+
+        // Optional fields
+        JTextField descriptionField = new JTextField(20);
+        JTextField categoryField = new JTextField(20);
+        JTextField priceField = new JTextField(20);
+        JTextField offsetField = new JTextField(20);
+        JTextField rangeField = new JTextField(20);
+
+        // Layout
+        int row = 0;
+
+        // Symbol (required)
+        gbc.gridx = 0; gbc.gridy = row;
+        panel.add(new JLabel("Symbol*:"), gbc);
+        gbc.gridx = 1;
+        panel.add(symbolField, gbc);
+
+        // Name (required)
+        row++;
+        gbc.gridx = 0; gbc.gridy = row;
+        panel.add(new JLabel("Name*:"), gbc);
+        gbc.gridx = 1;
+        panel.add(nameField, gbc);
+
+        // Description (optional)
+        row++;
+        gbc.gridx = 0; gbc.gridy = row;
+        panel.add(new JLabel("Description:"), gbc);
+        gbc.gridx = 1;
+        panel.add(descriptionField, gbc);
+
+        // Category (optional)
+        row++;
+        gbc.gridx = 0; gbc.gridy = row;
+        panel.add(new JLabel("Category:"), gbc);
+        gbc.gridx = 1;
+        panel.add(categoryField, gbc);
+
+        // Default Price (optional)
+        row++;
+        gbc.gridx = 0; gbc.gridy = row;
+        panel.add(new JLabel("Default Price ($):"), gbc);
+        gbc.gridx = 1;
+        panel.add(priceField, gbc);
+
+        // Price Change Offset (optional)
+        row++;
+        gbc.gridx = 0; gbc.gridy = row;
+        panel.add(new JLabel("Price Change Offset (%):"), gbc);
+        gbc.gridx = 1;
+        panel.add(offsetField, gbc);
+
+        // Price Change Range (optional)
+        row++;
+        gbc.gridx = 0; gbc.gridy = row;
+        panel.add(new JLabel("Price Change Range (%):"), gbc);
+        gbc.gridx = 1;
+        panel.add(rangeField, gbc);
+
+        // Info label
+        row++;
+        gbc.gridx = 0; gbc.gridwidth = 2; gbc.gridy = row;
+        panel.add(new JLabel("<html><small>* Required field<br>Leave optional fields empty for defaults</small></html>"), gbc);
+
+        JFrame frame = mainFrame;
+        // Show dialog
+        int result = JOptionPane.showConfirmDialog(
+                frame,
+                panel,
+                "Register New Cryptocurrency",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                // Get values
+                String symbol = symbolField.getText().trim();
+                String name = nameField.getText().trim();
+                String description = descriptionField.getText().trim();
+                String category = categoryField.getText().trim();
+                String priceStr = priceField.getText().trim();
+                String offsetStr = offsetField.getText().trim();
+                String rangeStr = rangeField.getText().trim();
+
+                // Validate required fields
+                if (symbol.isEmpty() || name.isEmpty()) {
+                    JOptionPane.showMessageDialog(frame,
+                            "Symbol and Name are required fields.",
+                            "Validation Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return null;
+                }
+
+                // Create builder with required fields
+                AssetMetadataBuilder builder = AssetMetadataBuilder.create(symbol, name);
+
+                // Conditionally add optional fields
+                if (!description.isEmpty()) {
+                    builder = builder.description(description);
+                }
+
+                if (!category.isEmpty()) {
+                    builder = builder.category(category);
+                }
+
+                if (!priceStr.isEmpty()) {
+                    try {
+                        double price = Double.parseDouble(priceStr);
+                        builder = builder.price(price);
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(frame,
+                                "Invalid price format. Using default price.",
+                                "Warning",
+                                JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+
+                if (!offsetStr.isEmpty()) {
+                    try {
+                        double offset = Double.parseDouble(offsetStr);
+                        builder = builder.priceChangeOffset(offset);
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(frame,
+                                "Invalid offset format. Using default offset.",
+                                "Warning",
+                                JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+
+                if (!rangeStr.isEmpty()) {
+                    try {
+                        double range = Double.parseDouble(rangeStr);
+                        builder = builder.priceChangeRange(range);
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(frame,
+                                "Invalid range format. Using default range.",
+                                "Warning",
+                                JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+
+                // Build and return metadata
+                return builder.build();
+
+            } catch (IllegalStateException e) {
+                JOptionPane.showMessageDialog(frame,
+                        "Error creating metadata: " + e.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return null;
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(frame,
+                        "Unexpected error: " + e.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
+        }
+
+        return null; // User cancelled
     }
     private void setupResizeListener() {
         mainFrame.addComponentListener(new java.awt.event.ComponentAdapter() {

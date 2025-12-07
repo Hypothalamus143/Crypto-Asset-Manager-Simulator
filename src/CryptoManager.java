@@ -80,6 +80,10 @@ public class CryptoManager {
                 case CryptoManagerGUI.PORTFOLIO_LOGOUT: // 8
                     inPortfolio = false;
                     break;
+                case CryptoManagerGUI.PORTFOLIO_REGISTER_CRYPTO: // 9
+                    System.out.println("DEBUG: Register crypto requested");
+                    handleRegisterCrypto();
+                    break;
 
                 default:
                     System.out.println("DEBUG: Unknown portfolio choice: " + choice);
@@ -87,6 +91,27 @@ public class CryptoManager {
         }
 
         System.out.println("=== Returning to main menu ===");
+    }
+    private void handleRegisterCrypto() {
+            AssetMetadata metadata = cryptoManagerGUI.showRegisterCryptoGUI();
+            boolean success = AssetRegistry.getInstance().register(metadata);
+        if(success) {
+            JOptionPane.showMessageDialog(null,
+                    "Cryptocurrency '" + metadata.getSymbol() + "' registered successfully!\n\n" +
+                            "Name: " + metadata.getName() + "\n" +
+                            "Default Price: $" + metadata.getDefaultPrice() + "\n" +
+                            "Current Price: $" + metadata.getCurrentPrice() + "\n\n" +
+                            "Metadata has been built and is ready for system integration.",
+                    "Registration Successful",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+        } else {
+            System.out.println("Error: ");
+            JOptionPane.showMessageDialog(null,
+                    "Registration failed: ",
+                    "Registration Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void handleExit() {
