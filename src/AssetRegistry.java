@@ -5,23 +5,19 @@ import java.util.List;
 import java.util.Map;
 
 public final class AssetRegistry {
-    private static final List<AssetMetadata> registeredMetadata = new ArrayList<>();
-    private static final String DATA_DIR = "data";
-    private static final String CSV_FILE = DATA_DIR + File.separator + "assetmetadata.csv";
+    private static AssetRegistry instance;
+    private final List<AssetMetadata> registeredMetadata = new ArrayList<>();
+    private final String DATA_DIR = "data";
+    private final String CSV_FILE = DATA_DIR + File.separator + "assetmetadata.csv";
 
-    static {
-        // Ensure data directory exists
+    private AssetRegistry() {
         new File(DATA_DIR).mkdirs();
         loadFromCSV();
     }
 
-    private AssetRegistry() {
-        // Private constructor - static utility class
-    }
-
     // ========== CSV SAVE/LOAD ==========
 
-    public static void saveToCSV() {
+    public  void saveToCSV() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE))) {
             // Write header
             writer.write("symbol,name,description,category,priceChangeRange,priceChangeOffset,defaultPrice,currentPrice,priceHistory");
@@ -51,7 +47,7 @@ public final class AssetRegistry {
         }
     }
 
-    public static void loadFromCSV() {
+    public  void loadFromCSV() {
         File file = new File(CSV_FILE);
         if (!file.exists()) {
             System.out.println("CSV file not found, starting with empty registry");
@@ -110,7 +106,7 @@ public final class AssetRegistry {
 
     // ========== HELPER METHODS ==========
 
-    private static String convertPriceHistoryToString(List<Double> priceHistory) {
+    private  String convertPriceHistoryToString(List<Double> priceHistory) {
         if (priceHistory == null || priceHistory.isEmpty()) {
             return "[]";
         }
@@ -124,7 +120,7 @@ public final class AssetRegistry {
         return sb.toString();
     }
 
-    private static List<Double> parsePriceHistoryString(String priceHistoryStr) {
+    private  List<Double> parsePriceHistoryString(String priceHistoryStr) {
         List<Double> priceHistory = new ArrayList<>();
 
         if (priceHistoryStr == null || priceHistoryStr.trim().isEmpty() ||
@@ -152,19 +148,19 @@ public final class AssetRegistry {
         return priceHistory;
     }
 
-    private static String escapeCommas(String str) {
+    private  String escapeCommas(String str) {
         if (str == null) return "";
         return str.replace(",", ";");
     }
 
-    private static String unescapeCommas(String str) {
+    private  String unescapeCommas(String str) {
         if (str == null) return "";
         return str.replace(";", ",");
     }
 
     // ========== REGISTRY METHODS ==========
 
-    public static void register(AssetMetadata metadata) {
+    public  void register(AssetMetadata metadata) {
         if (metadata == null) {
             throw new IllegalArgumentException("Metadata cannot be null");
         }
@@ -172,14 +168,15 @@ public final class AssetRegistry {
         // Check if symbol already exists
         String symbol = metadata.getSymbol();
         if (get(symbol) != null) {
-            throw new IllegalArgumentException("Symbol already registered: " + symbol);
+            System.out.println("Symbol already registered: " + symbol);
+            //throw new IllegalArgumentException("Symbol already registered: " + symbol);
         }
 
         registeredMetadata.add(metadata);
         saveToCSV(); // Auto-save after registration
     }
 
-    public static AssetMetadata get(String symbol) {
+    public  AssetMetadata get(String symbol) {
         if (symbol == null) return null;
 
         String searchSymbol = symbol.trim();
@@ -191,11 +188,11 @@ public final class AssetRegistry {
         return null;
     }
 
-    public static boolean contains(String symbol) {
+    public  boolean contains(String symbol) {
         return get(symbol) != null;
     }
 
-    public static void remove(String symbol) {
+    public  void remove(String symbol) {
         if (symbol == null) return;
 
         String searchSymbol = symbol.trim();
@@ -209,12 +206,12 @@ public final class AssetRegistry {
         }
     }
 
-    public static void clear() {
+    public  void clear() {
         registeredMetadata.clear();
         saveToCSV(); // Auto-save after clear
     }
 
-    public static List<AssetMetadata> getAll() {
+    public  List<AssetMetadata> getAll() {
         List<AssetMetadata> copy = new ArrayList<>();
         for (AssetMetadata metadata : registeredMetadata) {
             copy.add(metadata);
@@ -222,7 +219,7 @@ public final class AssetRegistry {
         return copy;
     }
 
-    public static List<String> getAllSymbols() {
+    public  List<String> getAllSymbols() {
         List<String> symbols = new ArrayList<>();
         for (AssetMetadata metadata : registeredMetadata) {
             symbols.add(metadata.getSymbol());
@@ -230,46 +227,46 @@ public final class AssetRegistry {
         return symbols;
     }
 
-    public static int size() {
+    public  int size() {
         return registeredMetadata.size();
     }
 
-    public static boolean isEmpty() {
+    public  boolean isEmpty() {
         return registeredMetadata.isEmpty();
     }
 
     // Manual save if needed (though auto-save is already done)
-    public static void save() {
+    public  void save() {
         saveToCSV();
     }
-    public static void updateAllAssetPrices() {
+    public  void updateAllAssetPrices() {
         for (AssetMetadata metadata : registeredMetadata) {
             metadata.updatePriceWithRandomChange();
         }
         saveToCSV(); // Auto-save after updating all prices
     }
-    public static List<Double> getPriceHistory(String symbol) {
+    public  List<Double> getPriceHistory(String symbol) {
         AssetMetadata metadata = get(symbol);
         if (metadata != null) {
             return metadata.getPriceHistory();
         }
         return new ArrayList<>(); // Return empty list if symbol not found
     }
-    public static String getName(String symbol){
+    public  String getName(String symbol){
         AssetMetadata metadata = get(symbol);
         if (metadata != null) {
             return metadata.getName();
         }
         return "Unknown";
     }
-    public static Map<String, Double> getAllCurrentPrices() {
+    public  Map<String, Double> getAllCurrentPrices() {
         Map<String, Double> priceMap = new HashMap<>();
         for (AssetMetadata metadata : registeredMetadata) {
             priceMap.put(metadata.getSymbol(), metadata.getCurrentPrice());
         }
         return priceMap;
     }
-    public static double getCurrentPrice(String symbol){
+    public  double getCurrentPrice(String symbol){
         AssetMetadata metadata = get(symbol);
         if (metadata != null) {
             return metadata.getCurrentPrice();
@@ -277,8 +274,13 @@ public final class AssetRegistry {
         return 0;
     }
     // Manual reload if needed
-    public static void reload() {
+    public  void reload() {
         registeredMetadata.clear();
         loadFromCSV();
+    }
+    public static AssetRegistry getInstance(){
+        if(instance == null)
+            return new AssetRegistry();
+        return instance;
     }
 }

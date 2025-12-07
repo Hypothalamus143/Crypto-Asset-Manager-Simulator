@@ -12,7 +12,6 @@ public final class EthereumMetadata extends AssetMetadata {
                 3200.0                                  // currentPrice
         );
     }
-
     public static AssetMetadata getInstance() {
         return new EthereumMetadata();
     }

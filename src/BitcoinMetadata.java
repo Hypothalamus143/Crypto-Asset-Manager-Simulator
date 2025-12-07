@@ -12,7 +12,6 @@ public final class BitcoinMetadata extends AssetMetadata {
                 45000.0                                 // currentPrice
         );
     }
-
     public static AssetMetadata getInstance() {
         return new BitcoinMetadata();
     }

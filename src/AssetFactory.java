@@ -1,9 +1,11 @@
 public class AssetFactory {
     private static AssetFactory instance;
+    private AssetRegistry assetRegistry;
     private AssetFactory() {
-        AssetRegistry.register(BitcoinMetadata.getInstance());
-        AssetRegistry.register(EthereumMetadata.getInstance());
-        AssetRegistry.register(SolanaMetadata.getInstance());
+        assetRegistry = AssetRegistry.getInstance();
+        assetRegistry.register(BitcoinMetadata.getInstance());
+        assetRegistry.register(EthereumMetadata.getInstance());
+        assetRegistry.register(SolanaMetadata.getInstance());
     }
 
     public static AssetFactory getInstance() {
@@ -14,7 +16,7 @@ public class AssetFactory {
     }
     public Asset createAsset(String symbol, double buyPrice, double amount) {
         // Loop through registered metadata
-        for (AssetMetadata metadata : AssetRegistry.getAll()) {
+        for (AssetMetadata metadata : assetRegistry.getAll()) {
             if (metadata.getSymbol().equalsIgnoreCase(symbol.trim())) {
                 // Create asset using metadata
                 return new Asset(metadata, buyPrice, amount);
