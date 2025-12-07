@@ -112,7 +112,6 @@ public class CryptoManager {
     }
 
     private void handleLogin() {
-        System.out.println(marketManager.getAllPrices().size());
         boolean loggedIn = false;
         LoginAttempt lastAttempt = null;
 

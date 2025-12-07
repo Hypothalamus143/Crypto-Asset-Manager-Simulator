@@ -1,51 +1,42 @@
 import java.util.Collections;
 import java.util.Comparator;
 
-public abstract class Asset implements Comparable<Asset>{
-    protected String name;
-    protected String symbol;
+public class Asset implements Comparable<Asset>{
+    private AssetMetadata assetMetadata;
     protected double buyPrice;  // Instance-specific
-    private MarketManager marketManager;
     protected double amount;    // Instance-specific
-    // REMOVED: currentPrice (will use MarketManager)
 
-    public Asset(String name, String symbol, double buyPrice, double amount) {
-        this.name = name;
-        this.symbol = symbol;
+    public Asset(AssetMetadata assetMetadata, double buyPrice, double amount) {
+        this.assetMetadata = assetMetadata;
         this.buyPrice = buyPrice;
         this.amount = amount;
-        marketManager = MarketManager.getInstance();
     }
 
     // Getters
-    public String getName() { return name; }
-    public String getSymbol() { return symbol; }
+    public String getName() { return assetMetadata.getName(); }
+    public String getSymbol() { return assetMetadata.getSymbol(); }
     public double getBuyPrice() { return buyPrice; }
     public double getAmount() { return amount; }
 
     // Current price comes from MarketManager (class-level)
     public double getCurrentPrice() {
-        return marketManager.getCurrentPrice(symbol);
+        return assetMetadata.getCurrentPrice();
     }
 
     // Setters
     public void setBuyPrice(double buyPrice) { this.buyPrice = buyPrice; }
     public void setAmount(double amount) { this.amount = amount; }
 
-    // Remove updatePrice() - MarketManager handles this globally
-    // public abstract void updatePrice(); // DELETE THIS
-
     // Common methods
     public double getTotalValue() {
         return getCurrentPrice() * amount; // Uses current market price
     }
-
     public double getUnrealizedProfit() {
         return (getCurrentPrice() - buyPrice) * amount; // Uses current market price
     }
     @Override
     public int compareTo(Asset other) {
-        return this.symbol.compareTo(other.symbol);
+        return this.getSymbol().compareTo(other.getSymbol());
     }
 
     // Simple Comparator classes with direction in constructor
@@ -58,7 +49,7 @@ public abstract class Asset implements Comparable<Asset>{
 
         @Override
         public int compare(Asset a1, Asset a2) {
-            int result = a1.symbol.compareTo(a2.symbol);
+            int result = a1.compareTo(a2);
             return ascending ? result : -result;
         }
     }
@@ -74,7 +65,7 @@ public abstract class Asset implements Comparable<Asset>{
         public int compare(Asset a1, Asset a2) {
             int result = Double.compare(a1.getTotalValue(), a2.getTotalValue());
             if (result == 0) {
-                return a1.symbol.compareTo(a2.symbol); // Return immediately for ties
+                return a1.compareTo(a2); // Return immediately for ties
             }
             return ascending ? result : -result;
         }
@@ -91,7 +82,7 @@ public abstract class Asset implements Comparable<Asset>{
         public int compare(Asset a1, Asset a2) {
             int result = Double.compare(a1.getUnrealizedProfit(), a2.getUnrealizedProfit());
             if (result == 0) {
-                return a1.symbol.compareTo(a2.symbol); // Return immediately for ties
+                return a1.compareTo(a2); // Return immediately for ties
             }
             return ascending ? result : -result;
         }
@@ -110,7 +101,7 @@ public abstract class Asset implements Comparable<Asset>{
             double percent2 = (a2.getCurrentPrice() - a2.getBuyPrice()) / a2.getBuyPrice();
             int result = Double.compare(percent1, percent2);
             if (result == 0) {
-                return a1.symbol.compareTo(a2.symbol); // Return immediately for ties
+                return a1.compareTo(a2); // Return immediately for ties
             }
             return ascending ? result : -result;
         }
@@ -127,7 +118,7 @@ public abstract class Asset implements Comparable<Asset>{
         public int compare(Asset a1, Asset a2) {
             int result = Double.compare(a1.getBuyPrice(), a2.getBuyPrice());
             if (result == 0) {
-                return a1.symbol.compareTo(a2.symbol); // Return immediately for ties
+                return a1.compareTo(a2); // Return immediately for ties
             }
             return ascending ? result : -result;
         }
@@ -144,7 +135,7 @@ public abstract class Asset implements Comparable<Asset>{
         public int compare(Asset a1, Asset a2) {
             int result = Double.compare(a1.getAmount(), a2.getAmount());
             if (result == 0) {
-                return a1.symbol.compareTo(a2.symbol); // Return immediately for ties
+                return a1.compareTo(a2); // Return immediately for ties
             }
             return ascending ? result : -result;
         }

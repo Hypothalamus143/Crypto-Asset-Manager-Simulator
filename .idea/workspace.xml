@@ -5,14 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="bugs and confirm password added">
+      <change afterPath="$PROJECT_DIR$/src/AssetMetadata.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AssetMetadataBuilder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AssetRegistry.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/BitcoinMetadata.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/EthereumMetadata.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/SolanaMetadata.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/market_prices.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/users/john.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/users/john.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Asset.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Asset.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AuthManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AuthManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AssetFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AssetFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Bitcoin.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CryptoManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CryptoManagerGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManagerGUI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ethereum.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/MarketManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/MarketManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Solana.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/UserRepository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -102,15 +102,7 @@ public class UserRepository {
                 double buyPrice = Double.parseDouble(parts[2].trim());
                 double amount = Double.parseDouble(parts[3].trim());
                 // Removed timestamp parsing
-
-                switch (type.toLowerCase()) {
-                    case "bitcoin":
-                        return new Bitcoin(buyPrice, amount);
-                    case "ethereum":
-                        return new Ethereum(buyPrice, amount);
-                    case "solana":
-                        return new Solana(buyPrice, amount);
-                }
+                return AssetFactory.getInstance().createAsset(symbol, buyPrice, amount);
             }
         } catch (Exception e) {
             System.err.println("Error parsing asset line: " + line);
@@ -126,10 +118,7 @@ public class UserRepository {
     }
 
     private String getAssetType(Asset asset) {
-        if (asset instanceof Bitcoin) return "bitcoin";
-        if (asset instanceof Ethereum) return "ethereum";
-        if (asset instanceof Solana) return "solana";
-        return "unknown";
+        return asset.getSymbol();
     }
 
     public boolean userExists(String username) {
