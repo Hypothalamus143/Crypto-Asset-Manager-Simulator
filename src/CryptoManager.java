@@ -291,7 +291,7 @@ public class CryptoManager {
 
         // Confirm purchase (in terminal, we'll assume yes since GUI already confirmed)
         System.out.printf("\nPurchase Summary:\n");
-        System.out.printf("Asset: %s (%s)\n", getAssetName(symbol), symbol);
+        System.out.printf("Asset: %s (%s)\n", AssetRegistry.getInstance().getName(symbol), symbol);
         System.out.printf("Amount: %.6f\n", amount);
         System.out.printf("Price: $%,.2f\n", currentPrice);
         System.out.printf("Total Cost: $%,.2f\n", totalCost);
@@ -321,15 +321,6 @@ public class CryptoManager {
             userRepository.saveUserData(currentUser, null);
         } else {
             System.out.println("Error: Could not create asset.");
-        }
-    }
-
-    String getAssetName(String symbol) {
-        switch (symbol.toUpperCase()) {
-            case "BTC": return "Bitcoin";
-            case "ETH": return "Ethereum";
-            case "SOL": return "Solana";
-            default: return "Unknown";
         }
     }
 
@@ -400,7 +391,7 @@ public class CryptoManager {
         for (Map.Entry<String, Double> entry : marketPrices.entrySet()) {
             String symbol = entry.getKey();
             double price = entry.getValue();
-            String assetName = getAssetName(symbol);
+            String assetName = AssetRegistry.getInstance().getName(symbol);
             System.out.printf("- %s (%s): $%,.2f\n", assetName, symbol, price);
         }
 
