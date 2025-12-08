@@ -1,3 +1,3 @@
-public interface Request {
+public interface Validatable {
     void validate() throws DialogException;
 }

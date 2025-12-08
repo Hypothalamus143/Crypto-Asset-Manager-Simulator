@@ -1,4 +1,4 @@
-public class LoginAttempt implements Request{
+public class LoginAttempt implements Validatable{
     private String username;
     private String password;
 

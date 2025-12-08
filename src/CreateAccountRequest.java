@@ -1,6 +1,6 @@
 import javax.swing.*;
 
-public class CreateAccountRequest implements Request{
+public class CreateAccountRequest implements Validatable{
     private String username;
     private String password;
     private String confirmPassword;
