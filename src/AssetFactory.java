@@ -3,9 +3,21 @@ public class AssetFactory {
     private AssetRegistry assetRegistry;
     private AssetFactory() {
         assetRegistry = AssetRegistry.getInstance();
-        assetRegistry.register(BitcoinMetadata.getInstance());
-        assetRegistry.register(EthereumMetadata.getInstance());
-        assetRegistry.register(SolanaMetadata.getInstance());
+        try {
+            assetRegistry.register(BitcoinMetadata.getInstance());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        try {
+            assetRegistry.register(EthereumMetadata.getInstance());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        try {
+            assetRegistry.register(SolanaMetadata.getInstance());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public static AssetFactory getInstance() {

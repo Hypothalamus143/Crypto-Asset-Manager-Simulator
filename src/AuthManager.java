@@ -12,48 +12,24 @@ public class AuthManager {
 
     }
 
-    public User login(LoginAttempt loginAttempt) {
-        if (loginAttempt == null || !loginAttempt.isValid()) {
-            JOptionPane.showMessageDialog(null,
-                    "Please fill all fields",
-                    "Login Error",
-                    JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-
+    public User login(LoginAttempt loginAttempt) throws DialogException{
+        loginAttempt.isValid();
         String username = loginAttempt.getUsername();
         String password = loginAttempt.getPassword();
-
         // Validate credentials
-        if (userRepository.validateCredentials(username, password)) {
-            User user = userRepository.loadUser(username);
-            if (user != null) {
+        try {
+            if (userRepository.validateCredentials(username, password)) {
+                User user = userRepository.loadUser(username);
                 System.out.println("Login successful for: " + username);
                 return user;
-            } else {
-                JOptionPane.showMessageDialog(null,
-                        "Error loading user data",
-                        "Login Error",
-                        JOptionPane.ERROR_MESSAGE);
-                return null;
             }
-        } else {
-            JOptionPane.showMessageDialog(null,
-                    "Invalid username or password",
-                    "Login Failed",
-                    JOptionPane.ERROR_MESSAGE);
-            return null;
+        } catch (Exception e) {
+            throw new DialogException(e.getMessage(), "Login Failed");
         }
+        return null;
     }
-    public boolean createAccount(CreateAccountRequest request) {
-        if (request == null || !request.isValid()) {
-            JOptionPane.showMessageDialog(null,
-                    "Please fill all fields",
-                    "Create Account Error",
-                    JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-
+    public boolean createAccount(CreateAccountRequest request) throws AccountRegistrationException, InvalidInputException{
+        request.isValid();
         String username = request.getUsername();
         String password = request.getPassword();
         String confirmPassword = request.getConfirmPassword();

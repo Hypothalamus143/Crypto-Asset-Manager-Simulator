@@ -1,3 +1,5 @@
+import javax.swing.*;
+
 public class CreateAccountRequest {
     private String username;
     private String password;
@@ -21,9 +23,14 @@ public class CreateAccountRequest {
         return confirmPassword;
     }
 
-    public boolean isValid() {
-        return username != null && !username.trim().isEmpty() &&
-                password != null && !password.trim().isEmpty() &&
-                confirmPassword != null && !confirmPassword.trim().isEmpty();
+    public void isValid() throws AccountRegistrationException, InvalidInputException{
+        if(username == null && username.trim().isEmpty())
+            throw InvalidInputException.emptyField("Username", "Account Creation Failed");
+        else if(password == null && password.trim().isEmpty())
+            throw InvalidInputException.emptyField("Password", "Account Creation Failed");
+        else if(confirmPassword == null && confirmPassword.trim().isEmpty())
+            throw InvalidInputException.emptyField("Password Confirmation", "Account Creation Failed");
+        else if (!password.equals(confirmPassword))
+            throw AccountRegistrationException.passwordMismatch();
     }
 }

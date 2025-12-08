@@ -17,7 +17,6 @@ public class Asset implements Comparable<Asset>{
     public String getSymbol() { return assetMetadata.getSymbol(); }
     public double getBuyPrice() { return buyPrice; }
     public double getAmount() { return amount; }
-
     // Current price comes from MarketManager (class-level)
     public double getCurrentPrice() {
         return assetMetadata.getCurrentPrice();

@@ -81,7 +81,11 @@ public final class AssetMetadataBuilder {
     }
 
     // Convenience static factory method
-    public static AssetMetadataBuilder create(String symbol, String name) {
+    public static AssetMetadataBuilder create(String symbol, String name) throws InvalidInputException{
+        if(symbol.isEmpty())
+            throw InvalidInputException.emptyField("Crypto Symbol", "Registration Failed");
+        else if(name.isEmpty())
+            throw InvalidInputException.emptyField("Crypto Name", "Registration Failed");
         return new AssetMetadataBuilder()
                 .symbol(symbol)
                 .name(name);

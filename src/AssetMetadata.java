@@ -75,7 +75,8 @@ public class AssetMetadata {
 
         // Apply the change to current price: ((change/100) + 1) * currentPrice
         double newPrice = ((changePercent / 100.0) + 1.0) * currentPrice;
-
+        if(newPrice < 0.01)
+            newPrice = 0.01;
         // Update current price and add to history
         this.currentPrice = newPrice;
         this.priceHistory.add(newPrice);

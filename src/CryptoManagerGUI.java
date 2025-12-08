@@ -170,11 +170,11 @@ public class CryptoManagerGUI {
 
 // Change return type from User to LoginAttempt
 // Login GUI with preserved values on retry
-public LoginAttempt showLoginGUI() {
+public LoginAttempt showLoginGUI() throws Exception {
     return showLoginGUI(null);
 }
 
-    public LoginAttempt showLoginGUI(LoginAttempt defaultValues) {
+    public LoginAttempt showLoginGUI(LoginAttempt defaultValues) throws Exception {
         JDialog loginDialog = new JDialog((JFrame)null, "Login", true);
         loginDialog.setSize(300, 200);
         loginDialog.setLocationRelativeTo(null);
@@ -230,17 +230,19 @@ public LoginAttempt showLoginGUI() {
         loginDialog.pack();
         loginDialog.setVisible(true);
 
+        if(result[0] == null)
+            throw new Exception("Login Attempt is null");
         return result[0];
     }
 
     // Create Account GUI with preserved values on retry
-    public CreateAccountRequest showCreateAccountGUI() {
+    public CreateAccountRequest showCreateAccountGUI() throws Exception{
         return showCreateAccountGUI(null);
     }
 
-    public CreateAccountRequest showCreateAccountGUI(CreateAccountRequest defaultValues) {
+    public CreateAccountRequest showCreateAccountGUI(CreateAccountRequest defaultValues) throws Exception{
         JDialog createAccDialog = new JDialog((JFrame)null, "Create Account", true);
-        createAccDialog.setSize(400, 320); // Slightly taller for error messages
+        createAccDialog.setSize(400, 200); // Slightly taller for error messages
         createAccDialog.setLocationRelativeTo(null);
         createAccDialog.setResizable(false);
 
@@ -348,44 +350,6 @@ public LoginAttempt showLoginGUI() {
 
         final CreateAccountRequest[] result = new CreateAccountRequest[1];
 
-        // Real-time password matching indicator
-        DocumentListener passwordListener = new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                checkPasswords();
-            }
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                checkPasswords();
-            }
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                checkPasswords();
-            }
-
-            private void checkPasswords() {
-                String password = new String(passField.getPassword());
-                String confirmPassword = new String(confirmPassField.getPassword());
-
-                if (password.isEmpty() && confirmPassword.isEmpty()) {
-                    passwordMatchLabel.setText("");
-                    passwordMatchLabel.setForeground(Color.GRAY);
-                } else if (password.equals(confirmPassword)) {
-                    passwordMatchLabel.setText("✓ Passwords match");
-                    passwordMatchLabel.setForeground(new Color(0, 150, 0));
-                } else {
-                    passwordMatchLabel.setText("✗ Passwords do not match");
-                    passwordMatchLabel.setForeground(Color.RED);
-                }
-
-                passwordMatchLabel.setPreferredSize(new Dimension(0, 20));
-                createAccDialog.pack();
-            }
-        };
-
-        passField.getDocument().addDocumentListener(passwordListener);
-        confirmPassField.getDocument().addDocumentListener(passwordListener);
-
         createBtn.addActionListener(e -> {
             String username = userField.getText().trim();
             String password = new String(passField.getPassword()).trim();
@@ -411,15 +375,17 @@ public LoginAttempt showLoginGUI() {
         createAccDialog.pack();
         createAccDialog.setVisible(true);
 
+        if(result[0] == null)
+            throw new Exception("Create Account Request is null");
         return result[0];
     }
-    private JPanel createChartPanel() {
+    private JPanel createChartPanel() throws Exception{
         chartContainer = new JPanel(new BorderLayout());
         changeChart(currentChartSymbol);
         return chartContainer;
     }
 
-    private JPanel createSimpleChart(List<Double> prices, String symbol) {
+    private JPanel createSimpleChart(List<Double> prices, String symbol){
         // Create a chart panel that's wider than the viewport
         JPanel chartPanel = new JPanel() {
             @Override
@@ -428,25 +394,12 @@ public LoginAttempt showLoginGUI() {
                 // Pass this panel's dimensions to drawPriceChart
                 drawPriceChart(g, prices, symbol, getWidth(), getHeight());
             }
-
-            @Override
-            public Dimension getPreferredSize() {
-                // Make width proportional to number of data points
-                int dataPoints = prices.size();
-                int width = Math.max(800, dataPoints * 10); // At least 800px, or 10px per data point
-                int height = Math.max(150, getParent() != null ? getParent().getHeight() / 3 : 150);
-                return new Dimension(width, height);
-            }
         };
 
         return chartPanel;
     }
 
-    private void drawPriceChart(Graphics g, List<Double> prices, String symbol, int width, int height) {
-        if (prices.size() < 2) return;
-
-        // Use the full width of the chart panel (not the viewport)
-        // This ensures all data points are visible when scrolling
+    private void drawPriceChart(Graphics g, List<Double> prices, String symbol, int width, int height){
 
         int padding = 30; // Increased padding for better labels
 
@@ -504,12 +457,9 @@ public LoginAttempt showLoginGUI() {
 
             g2d.drawLine(x1, y1, x2, y2);
 
-            // Draw data points for significant changes
-            if (prices.size() > 20 && i % (prices.size() / 20) == 0 || i == prices.size() - 1) {
-                g2d.setColor(Color.RED);
-                g2d.fillOval(x2 - 3, y2 - 3, 6, 6);
-                g2d.setColor(Color.BLUE);
-            }
+            g2d.setColor(Color.RED);
+            g2d.fillOval(x2 - 3, y2 - 3, 6, 6);
+            g2d.setColor(Color.BLUE);
         }
 
         // Draw current price info
@@ -535,7 +485,7 @@ public LoginAttempt showLoginGUI() {
         }
     }
 
-    private JPanel createMarketPricesPanel() {
+    private JPanel createMarketPricesPanel() throws Exception{
         JPanel marketPanel = new JPanel(new BorderLayout());
         marketPanel.setBorder(BorderFactory.createTitledBorder("Market Prices"));
 
@@ -603,7 +553,7 @@ public LoginAttempt showLoginGUI() {
         return marketPanel;
     }
 
-    private JPanel createMarketPricePanel(String symbol, double price) {
+    private JPanel createMarketPricePanel(String symbol, double price) throws Exception{
         // Create a panel that will fill width
         JPanel pricePanel = new JPanel(new BorderLayout());
         pricePanel.setBorder(BorderFactory.createEtchedBorder());
@@ -625,8 +575,12 @@ public LoginAttempt showLoginGUI() {
         // Create a mouse listener
         MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                changeChart(symbol);
+            public void mouseClicked(MouseEvent e){
+                try {
+                    changeChart(symbol);
+                } catch (Exception ex) {
+                    System.out.println("Ain't happening, trust me bro");
+                }
             }
 
             @Override
@@ -647,20 +601,18 @@ public LoginAttempt showLoginGUI() {
 
         return pricePanel;
     }
-    private void changeChart(String symbol) {
+    private void changeChart(String symbol) throws Exception{
         currentChartSymbol = symbol;
 
         chartContainer.removeAll();
 
         List<Double> priceHistory = marketManager.getPriceHistory(symbol);
 
-        if (priceHistory.isEmpty()) {
-            chartContainer.add(new JLabel("No price data available", JLabel.CENTER), BorderLayout.CENTER);
-        } else {
-            // Create a panel that will expand
-            JPanel chartPanel = createSimpleChart(priceHistory, symbol);
-            chartContainer.add(chartPanel, BorderLayout.CENTER);
-        }
+        if (priceHistory.isEmpty())
+            throw new Exception("No price data available");
+        // Create a panel that will expand
+        JPanel chartPanel = createSimpleChart(priceHistory, symbol);
+        chartContainer.add(chartPanel, BorderLayout.CENTER);
 
         // Update buy button
         JButton buyButton = new JButton("Buy " + symbol);
@@ -734,7 +686,9 @@ public LoginAttempt showLoginGUI() {
         return summaryPanel;
     }
 //
-    public double showBuyCryptoGUI(String symbol, double currentPrice, double currentBalance) {
+    public String showBuyCryptoGUI(String symbol, double currentPrice, double currentBalance) throws DialogException {
+        if(currentBalance <= 0)
+            throw new DialogException("Current Balance is Zero\nDeposit now!", "Buy Crypto Failed");
         JDialog buyDialog = new JDialog(mainFrame, "Buy " + symbol, true);
         buyDialog.setSize(400, 350);
         buyDialog.setLocationRelativeTo(mainFrame);
@@ -817,7 +771,7 @@ public LoginAttempt showLoginGUI() {
         panel.add(Box.createVerticalStrut(10));
         panel.add(buttonPanel);
 
-        final double[] result = new double[]{-1}; // -1 means cancelled
+        final String[] result = new String[]{null};
 
         // Update function
         Runnable updateValues = () -> {
@@ -900,32 +854,13 @@ public LoginAttempt showLoginGUI() {
         });
 
         buyBtn.addActionListener(e -> {
-            try {
-                double amount = Double.parseDouble(amountField.getText().trim());
-
-                if (amount <= 0) {
-                    JOptionPane.showMessageDialog(buyDialog, "Amount must be positive");
-                    return;
-                }
-
-                double totalCost = amount * currentPrice;
-                if (totalCost > currentBalance) {
-                    JOptionPane.showMessageDialog(buyDialog,
-                            String.format("Insufficient funds. You need $%,.2f", totalCost));
-                    return;
-                }
-
-                result[0] = amount;
-                buyDialog.dispose();
-
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(buyDialog, "Please enter a valid amount");
-            }
+            result[0] = amountField.getText().trim();
+            buyDialog.dispose();
         });
 
         cancelBtn.addActionListener(e -> {
             buyDialog.dispose();
-            result[0] = 0;
+            result[0] = null;
         });
 
         // Initialize
@@ -1107,7 +1042,7 @@ private JPanel createActionButtons() {
 //    }
 //
 //
-public void showPortfolioPanel() {
+public void showPortfolioPanel() throws Exception{
     // Always create a fresh portfolio panel
     JPanel portfolioPanel = createPortfolioPanel();
 
@@ -1123,11 +1058,10 @@ public void showPortfolioPanel() {
     mainPanel.add(portfolioPanel, PORTFOLIO_PANEL);
     cardLayout.show(mainPanel, PORTFOLIO_PANEL);
 
-    // No refresh needed - panel is created fresh with latest data
 }
 
 //
-    private JPanel createPortfolioPanel() {
+    private JPanel createPortfolioPanel() throws Exception{
         JPanel portfolioPanel = new JPanel(new BorderLayout(10, 10));
         portfolioPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -1142,7 +1076,7 @@ public void showPortfolioPanel() {
 
         return portfolioPanel;
     }
-    private JPanel createPortfolioContent() {
+    private JPanel createPortfolioContent() throws Exception{
         JPanel contentPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
@@ -1297,7 +1231,7 @@ public void showPortfolioPanel() {
         return result[0];
     }
 
-    public double showSellCryptoGUI(Asset asset) {
+    public double showSellCryptoGUI(Asset asset){
         JDialog sellDialog = new JDialog(mainFrame, "Sell " + asset.getSymbol(), true);
         sellDialog.setSize(400, 350);
         sellDialog.setLocationRelativeTo(mainFrame);
@@ -1525,7 +1459,7 @@ public void showPortfolioPanel() {
         return result[0];
     }
     // Add this method to show the register crypto dialog
-    public AssetMetadata showRegisterCryptoGUI() {
+    public AssetMetadata showRegisterCryptoGUI() throws InvalidInputException{
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -1618,15 +1552,6 @@ public void showPortfolioPanel() {
                 String priceStr = priceField.getText().trim();
                 String offsetStr = offsetField.getText().trim();
                 String rangeStr = rangeField.getText().trim();
-
-                // Validate required fields
-                if (symbol.isEmpty() || name.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame,
-                            "Symbol and Name are required fields.",
-                            "Validation Error",
-                            JOptionPane.ERROR_MESSAGE);
-                    return null;
-                }
 
                 // Create builder with required fields
                 AssetMetadataBuilder builder = AssetMetadataBuilder.create(symbol, name);

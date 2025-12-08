@@ -160,23 +160,19 @@ public final class AssetRegistry {
 
     // ========== REGISTRY METHODS ==========
 
-    public  boolean register(AssetMetadata metadata) {
+    public void register(AssetMetadata metadata) throws Exception{
         if (metadata == null) {
-            throw new IllegalArgumentException("Metadata cannot be null");
+            throw new Exception("Metadata cannot be null");
         }
 
         // Check if symbol already exists
         String symbol = metadata.getSymbol();
-        if (get(symbol) != null) {
-            System.out.println("Symbol already registered: " + symbol);
-            return false;
-            //throw new IllegalArgumentException("Symbol already registered: " + symbol);
-        }
+        if (get(symbol) != null)
+            throw new Exception("Symbol already registered: " + symbol);
 
         registeredMetadata.add(metadata);
         System.out.println("Successfully registered " + symbol);
         saveToCSV(); // Auto-save after registration
-        return true;
     }
 
     public  AssetMetadata get(String symbol) {

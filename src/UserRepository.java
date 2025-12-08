@@ -59,10 +59,10 @@ public class UserRepository {
         }
     }
 
-    public User loadUser(String username) {
+    public User loadUser(String username) throws Exception {
         File userFile = new File(getUserFilePath(username));
         if (!userFile.exists()) {
-            return null;
+            throw new Exception("No Users Found");
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(userFile))) {
@@ -88,9 +88,9 @@ public class UserRepository {
                 }
             }
         } catch (IOException | NumberFormatException e) {
-            System.err.println("Error loading user: " + e.getMessage());
+            throw new Exception("Error reading auth file: " + e.getMessage());
         }
-        return null;
+        throw new Exception("User not Found");
     }
 
     private Asset parseAssetLine(String line) {
@@ -140,7 +140,7 @@ public class UserRepository {
         return false;
     }
 
-    public boolean validateCredentials(String username, String password) {
+    public boolean validateCredentials(String username, String password) throws Exception{
         try (BufferedReader reader = new BufferedReader(new FileReader(AUTH_FILE))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -150,9 +150,9 @@ public class UserRepository {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error reading auth file: " + e.getMessage());
+            throw new Exception("Error reading auth file: " + e.getMessage());
         }
-        return false;
+        throw new Exception("Invalid Username or Password");
     }
     public static UserRepository getInstance() {
         if(instance == null) {

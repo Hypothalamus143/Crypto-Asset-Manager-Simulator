@@ -15,8 +15,11 @@ public class LoginAttempt {
         return password;
     }
 
-    public boolean isValid() {
-        return username != null && !username.trim().isEmpty() &&
-                password != null && !password.trim().isEmpty();
+    public boolean isValid() throws InvalidInputException{
+        if(username == null || username.trim().isEmpty())
+            throw InvalidInputException.emptyField("Username", "Login Failed");
+        else if(password == null || password.trim().isEmpty())
+            throw InvalidInputException.emptyField("Password", "Login Failed");
+        return true;
     }
 }

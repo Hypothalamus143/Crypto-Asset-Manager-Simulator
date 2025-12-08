@@ -50,7 +50,12 @@ public class CryptoManager {
         boolean inPortfolio = true;
 
         while (inPortfolio) {
-            cryptoManagerGUI.showPortfolioPanel();
+            try {
+                cryptoManagerGUI.showPortfolioPanel();
+            } catch (Exception e) {
+                checkMarket();
+                continue;
+            }
             // Get portfolio choice from GUI (this blocks)
             int choice = cryptoManagerGUI.getPortfolioChoice();
 
@@ -93,25 +98,25 @@ public class CryptoManager {
         System.out.println("=== Returning to main menu ===");
     }
     private void handleRegisterCrypto() {
-            AssetMetadata metadata = cryptoManagerGUI.showRegisterCryptoGUI();
-            boolean success = AssetRegistry.getInstance().register(metadata);
-        if(success) {
-            JOptionPane.showMessageDialog(null,
-                    "Cryptocurrency '" + metadata.getSymbol() + "' registered successfully!\n\n" +
-                            "Name: " + metadata.getName() + "\n" +
-                            "Default Price: $" + metadata.getDefaultPrice() + "\n" +
-                            "Current Price: $" + metadata.getCurrentPrice() + "\n\n" +
-                            "Metadata has been built and is ready for system integration.",
-                    "Registration Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
-
-        } else {
-            System.out.println("Error: ");
-            JOptionPane.showMessageDialog(null,
-                    "Registration failed: ",
-                    "Registration Error",
-                    JOptionPane.ERROR_MESSAGE);
+        AssetMetadata metadata = null;
+        try {
+            metadata = cryptoManagerGUI.showRegisterCryptoGUI();
+        } catch (InvalidInputException e) {
+            JOptionPane.showMessageDialog(null, e.getDialogMessage(), e.getDialogTitle(), JOptionPane.ERROR_MESSAGE);
         }
+        try {
+            AssetRegistry.getInstance().register(metadata);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Registration Failed", JOptionPane.ERROR_MESSAGE);
+        }
+        JOptionPane.showMessageDialog(null,
+                "Cryptocurrency '" + metadata.getSymbol() + "' registered successfully!\n\n" +
+                        "Name: " + metadata.getName() + "\n" +
+                        "Default Price: $" + metadata.getDefaultPrice() + "\n" +
+                        "Current Price: $" + metadata.getCurrentPrice() + "\n\n" +
+                        "Metadata has been built and is ready for system integration.",
+                "Registration Successful",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void handleExit() {
@@ -142,25 +147,27 @@ public class CryptoManager {
 
         while (!loggedIn) {
             // Show login GUI with previous attempt values
-            LoginAttempt loginAttempt = cryptoManagerGUI.showLoginGUI(lastAttempt);
-
-            if (loginAttempt == null) {
-                // User cancelled
-                System.out.println("Login cancelled");
-                break;
+            LoginAttempt loginAttempt = null;
+            try {
+                loginAttempt = cryptoManagerGUI.showLoginGUI(lastAttempt);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
             }
-
             // Store attempt for potential retry (with all values preserved)
             lastAttempt = loginAttempt;
 
-            User user = authManager.login(loginAttempt);
-
-            if (user != null) {
+            User user = null;
+            try {
+                user = authManager.login(loginAttempt);
                 currentUser = user;
                 loggedIn = true;
                 runPortfolioManager();
+            } catch (DialogException e) {
+                JOptionPane.showMessageDialog(null,
+                        e.getDialogMessage(),
+                        e.getDialogTitle(),
+                        JOptionPane.ERROR_MESSAGE);
             }
-            // If login fails, loop continues with all values preserved
         }
     }
 
@@ -170,23 +177,24 @@ public class CryptoManager {
 
         while (!accountCreated) {
             // Show create account GUI with previous request values
-            CreateAccountRequest request = cryptoManagerGUI.showCreateAccountGUI(lastRequest);
-
-            if (request == null) {
-                // User cancelled
-                System.out.println("Account creation cancelled");
-                break;
+            CreateAccountRequest request = null;
+            try {
+                request = cryptoManagerGUI.showCreateAccountGUI(lastRequest);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
             }
 
-            // Store request for potential retry (with all values preserved)
             lastRequest = request;
 
-            accountCreated = authManager.createAccount(request);
-
-            if (accountCreated) {
+            try {
+                accountCreated = authManager.createAccount(request);
                 System.out.println("Account created successfully!");
+            } catch (DialogException e) {
+                JOptionPane.showMessageDialog(null,
+                        e.getDialogMessage(),
+                        e.getDialogTitle(),
+                        JOptionPane.ERROR_MESSAGE);
             }
-            // If creation fails, loop continues with all values preserved
         }
     }
 
@@ -273,32 +281,58 @@ public class CryptoManager {
     }
 
     public void buyCrypto() {
-        String symbol = cryptoManagerGUI.getBuyChoice();
-        double currentPrice = marketManager.getCurrentPrice(symbol);
-        double amount = cryptoManagerGUI.showBuyCryptoGUI(symbol, currentPrice, currentUser.getBalance());
-        if(amount <= 0)
-            return;
-        System.out.println("\n--- Buy Crypto ---");
+        boolean success = false;
+        while(!success) {
+            String symbol = cryptoManagerGUI.getBuyChoice();
+            double currentPrice = marketManager.getCurrentPrice(symbol);
+            double amount = 0;
+            try {
+                amount = Double.parseDouble(cryptoManagerGUI.showBuyCryptoGUI(symbol, currentPrice, currentUser.getBalance()));
+            } catch (DialogException e) {
+                JOptionPane.showMessageDialog(null,
+                        e.getMessage(),
+                        e.getDialogTitle(),
+                        JOptionPane.INFORMATION_MESSAGE);
+                return;
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null,
+                        "Please enter a valid amount", "Buy Crypto Failed",
+                        JOptionPane.ERROR_MESSAGE);
+            } catch (NullPointerException e) {
+                System.out.println("Buy Crypto Cancelled");
+                return;
+            }
+            if (amount <= 0) {
+                JOptionPane.showMessageDialog(null,
+                        "Amount must be greater then 0", "Buy Crypto Failed",
+                        JOptionPane.ERROR_MESSAGE);
 
-        double totalCost = currentPrice * amount;
+                continue;
+            }
+            System.out.println("\n--- Buy Crypto ---");
 
-        // Check if user has enough balance
-        if (totalCost > currentUser.getBalance()) {
-            System.out.printf("Insufficient funds. You need $%,.2f but only have $%,.2f\n",
-                    totalCost, currentUser.getBalance());
-            return;
+            double totalCost = currentPrice * amount;
+
+            // Check if user has enough balance
+            if (totalCost > currentUser.getBalance()) {
+                JOptionPane.showMessageDialog(null,
+                        String.format("Insufficient funds. You need $%,.2f but only have $%,.2f\n"), "Buy Crypto Failed",
+                        JOptionPane.ERROR_MESSAGE);
+                continue;
+            }
+
+            // Confirm purchase (in terminal, we'll assume yes since GUI already confirmed)
+            System.out.printf("\nPurchase Summary:\n");
+            System.out.printf("Asset: %s (%s)\n", AssetRegistry.getInstance().getName(symbol), symbol);
+            System.out.printf("Amount: %.6f\n", amount);
+            System.out.printf("Price: $%,.2f\n", currentPrice);
+            System.out.printf("Total Cost: $%,.2f\n", totalCost);
+            System.out.println("Purchase confirmed via GUI.");
+
+            // Execute purchase
+            executePurchase(symbol, currentPrice, amount, totalCost);
+            success = true;
         }
-
-        // Confirm purchase (in terminal, we'll assume yes since GUI already confirmed)
-        System.out.printf("\nPurchase Summary:\n");
-        System.out.printf("Asset: %s (%s)\n", AssetRegistry.getInstance().getName(symbol), symbol);
-        System.out.printf("Amount: %.6f\n", amount);
-        System.out.printf("Price: $%,.2f\n", currentPrice);
-        System.out.printf("Total Cost: $%,.2f\n", totalCost);
-        System.out.println("Purchase confirmed via GUI.");
-
-        // Execute purchase
-        executePurchase(symbol, currentPrice, amount, totalCost);
     }
 
 
@@ -359,14 +393,9 @@ public class CryptoManager {
         // Update realized profit
         currentUser.setRealizedProfit(currentUser.getRealizedProfit() + realizedProfit);
 
-        // Update asset amount or remove if fully sold
-        if (amountToSell == asset.getAmount()) {
-            // Fully sold - remove the asset
+        asset.setAmount(asset.getAmount() - amountToSell);
+        if(asset.getAmount() == 0)
             currentUser.getAssets().remove(asset);
-        } else {
-            // Partially sold - reduce amount
-            asset.setAmount(asset.getAmount() - amountToSell);
-        }
         // AUTO-SORT after selling (in case removal changed order)
         Sorter.sort(currentUser.getAssets());
 
