@@ -145,6 +145,7 @@ public class CryptoManager {
                 loginAttempt = cryptoManagerGUI.showLoginGUI(lastAttempt);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
+                return;
             }
             // Store attempt for potential retry (with all values preserved)
             lastAttempt = loginAttempt;
@@ -172,17 +173,22 @@ public class CryptoManager {
                 request = cryptoManagerGUI.showCreateAccountGUI(lastRequest);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
+                return;
             }
 
             lastRequest = request;
 
             try {
-                accountCreated = authManager.createAccount(request);
+                authManager.createAccount(request);
                 System.out.println("Account created successfully!");
+                accountCreated = true;
             } catch (DialogException e) {
                 cryptoManagerGUI.showErrorMessage(e.getDialogMessage(), e.getDialogTitle());
+            } catch (Exception e) {
+                cryptoManagerGUI.showErrorMessage(e.getMessage(), "Account Registration Failed");
             }
         }
+    cryptoManagerGUI.showSuccessDialog("Account Created SuccessFully", "Account Creation Successful");
     }
 
     public void sortLots() {
@@ -307,13 +313,17 @@ public class CryptoManager {
             System.out.println("Purchase confirmed via GUI.");
 
             // Execute purchase
-            executePurchase(symbol, currentPrice, amount, totalCost);
+            try {
+                executePurchase(symbol, currentPrice, amount, totalCost);
+            } catch (Exception e) {
+                cryptoManagerGUI.showErrorMessage(e.getMessage(), "Buy Crypto Failed");
+            }
             success = true;
         }
     }
 
 
-    private void executePurchase(String symbol, double buyPrice, double amount, double totalCost) {
+    private void executePurchase(String symbol, double buyPrice, double amount, double totalCost) throws Exception {
         // Create the asset
         Asset newAsset = assetFactory.createAsset(symbol, buyPrice, amount);
 
@@ -380,7 +390,11 @@ public class CryptoManager {
         System.out.printf("Received: $%,.2f\n", totalValue);
         System.out.printf("Realized Profit: $%,.2f\n", realizedProfit);
         System.out.printf("New balance: $%,.2f\n", currentUser.getBalance());
-        userRepository.saveUserData(currentUser, null);
+        try {
+            userRepository.saveUserData(currentUser, null);
+        } catch (Exception e) {
+            cryptoManagerGUI.showErrorMessage(e.getMessage(), "Sell Crypto Failed");
+        }
     }
 
     void checkMarket() {
@@ -417,7 +431,11 @@ public class CryptoManager {
             System.out.printf("Successfully deposited $%.2f\n", amount);
             System.out.printf("Old balance: $%.2f\n", oldBalance);
             System.out.printf("New balance: $%.2f\n", newBalance);
-            userRepository.saveUserData(currentUser, null);
+            try {
+                userRepository.saveUserData(currentUser, null);
+            } catch (Exception e) {
+                cryptoManagerGUI.showErrorMessage(e.getMessage(), "Deposit Failed");
+            }
             cryptoManagerGUI.showErrorMessage(String.format("Deposited $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
                     "Deposit Successful");
         }
@@ -435,7 +453,11 @@ public class CryptoManager {
             System.out.printf("Successfully withdrew $%.2f\n", amount);
             System.out.printf("Old balance: $%.2f\n", oldBalance);
             System.out.printf("New balance: $%.2f\n", newBalance);
-            userRepository.saveUserData(currentUser, null);
+            try {
+                userRepository.saveUserData(currentUser, null);
+            } catch (Exception e) {
+                cryptoManagerGUI.showErrorMessage(e.getMessage(), "Withdrawal Failed");
+            }
             cryptoManagerGUI.showInformationMessage(String.format("Withdrew $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
                     "Withdrawal Successful");
         }

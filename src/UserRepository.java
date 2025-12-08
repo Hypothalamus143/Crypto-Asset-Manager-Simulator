@@ -16,20 +16,18 @@ public class UserRepository {
         }
     }
 
-    public boolean saveUserData(User user, String password) {
-        // If password is provided, also save to auth file (for new users)
-        if (password != null && !password.isEmpty()) {
-            if (!saveUserToAuthFile(user.getUsername(), password)) {
-                return false;
-            }
-        }
+    public void saveUserData(User user, String password) throws Exception{
+        if(password == null)
+            throw new Exception("Password is null");
+        if(password.trim().isEmpty())
+            throw new Exception("Password is Empty");
+        saveUserToAuthFile(user.getUsername(), password);
 
-        // Always save user data to their file
-        return saveUserToFile(user);
+        saveUserToFile(user);
     }
 
     // Private method for actual file writing
-    private boolean saveUserToFile(User user) {
+    private void saveUserToFile(User user) throws Exception{
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(getUserFilePath(user.getUsername())))) {
             // First line: balance,realized_profit
             writer.write(user.getBalance() + "," + user.getRealizedProfit());
@@ -40,11 +38,8 @@ public class UserRepository {
                 writer.write(assetToCsvLine(asset));
                 writer.newLine();
             }
-
-            return true;
         } catch (IOException e) {
-            System.err.println("Error saving user data: " + e.getMessage());
-            return false;
+            throw new Exception(e.getMessage());
         }
     }
 

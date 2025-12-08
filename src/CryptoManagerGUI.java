@@ -1686,6 +1686,14 @@ public void showPortfolioPanel() throws Exception{
         return JOptionPane.showConfirmDialog(mainFrame, message, title,JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);
     }
+    public void showSuccessDialog(String message, String title) {
+        JOptionPane.showMessageDialog(
+                mainFrame,
+                "✓ " + message,
+                title,
+                JOptionPane.INFORMATION_MESSAGE
+        );
+    }
     public void setCurrentUser(User user){
         currentUser = user;
     }

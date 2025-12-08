@@ -15,14 +15,6 @@ public class AccountRegistrationException extends DialogException {
         );
     }
 
-    public static AccountRegistrationException duplicateEmail(String email) {
-        return new AccountRegistrationException(
-                "Email '" + email + "' is already registered",
-                "Registration Failed",
-                "Use a different email or try to recover your account"
-        );
-    }
-
     public static AccountRegistrationException weakPassword(String requirement) {
         return new AccountRegistrationException(
                 "Password does not meet security requirements",
@@ -39,38 +31,13 @@ public class AccountRegistrationException extends DialogException {
         );
     }
 
-    public static AccountRegistrationException invalidUsernameFormat() {
+    public static AccountRegistrationException invalidUsernameFormat(String requirement) {
         return new AccountRegistrationException(
                 "Username has invalid format",
                 "Invalid Username",
-                "Use 3-20 characters: letters, numbers, or underscores"
+                "Requirement: " + requirement
         );
     }
-
-    public static AccountRegistrationException invalidEmailFormat() {
-        return new AccountRegistrationException(
-                "Email has invalid format",
-                "Invalid Email",
-                "Enter a valid email address (e.g., user@example.com)"
-        );
-    }
-
-    public static AccountRegistrationException ageRestriction(int minAge) {
-        return new AccountRegistrationException(
-                "You must be at least " + minAge + " years old to register",
-                "Age Restriction",
-                "Registration is only available for users " + minAge + " years and older"
-        );
-    }
-
-    public static AccountRegistrationException termsNotAccepted() {
-        return new AccountRegistrationException(
-                "You must accept the Terms of Service",
-                "Terms Required",
-                "Please read and accept the Terms of Service to continue"
-        );
-    }
-
     // Helper method to generate username suggestions
     private static String generateSuffix() {
         // Generate a random number suffix (100-999)
