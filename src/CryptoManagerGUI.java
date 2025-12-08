@@ -1032,16 +1032,6 @@ private JPanel createActionButtons() {
 
         return assetPanel;
     }
-//
-//    private void handleSort(String sortBy, String direction) {
-//        currentSortBy = sortBy;
-//        currentSortDirection = direction;
-//
-//        cryptoManager.sortLots(sortBy, direction);
-//        showPortfolioPanel(cryptoManager.getCurrentUser());
-//    }
-//
-//
 public void showPortfolioPanel() throws Exception{
     // Always create a fresh portfolio panel
     JPanel portfolioPanel = createPortfolioPanel();
@@ -1685,6 +1675,16 @@ public void showPortfolioPanel() throws Exception{
             portfolioChoice = choice;
             portfolioChoiceLock.notifyAll();
         }
+    }
+    public void showInformationMessage(String message, String title){
+        JOptionPane.showMessageDialog(mainFrame, message, title, JOptionPane.INFORMATION_MESSAGE);
+    }
+    public void showErrorMessage(String message, String title){
+        JOptionPane.showMessageDialog(mainFrame, message, title, JOptionPane.ERROR_MESSAGE);
+    }
+    public int showConfirmationDialog(String message, String title){
+        return JOptionPane.showConfirmDialog(mainFrame, message, title,JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
     }
     public void setCurrentUser(User user){
         currentUser = user;

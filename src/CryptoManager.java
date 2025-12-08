@@ -102,31 +102,24 @@ public class CryptoManager {
         try {
             metadata = cryptoManagerGUI.showRegisterCryptoGUI();
         } catch (InvalidInputException e) {
-            JOptionPane.showMessageDialog(null, e.getDialogMessage(), e.getDialogTitle(), JOptionPane.ERROR_MESSAGE);
+            cryptoManagerGUI.showErrorMessage(e.getDialogMessage(), e.getDialogTitle());
         }
         try {
             AssetRegistry.getInstance().register(metadata);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Registration Failed", JOptionPane.ERROR_MESSAGE);
+            cryptoManagerGUI.showErrorMessage(e.getMessage(), "Registration Failed");
         }
-        JOptionPane.showMessageDialog(null,
-                "Cryptocurrency '" + metadata.getSymbol() + "' registered successfully!\n\n" +
-                        "Name: " + metadata.getName() + "\n" +
-                        "Default Price: $" + metadata.getDefaultPrice() + "\n" +
-                        "Current Price: $" + metadata.getCurrentPrice() + "\n\n" +
-                        "Metadata has been built and is ready for system integration.",
-                "Registration Successful",
-                JOptionPane.INFORMATION_MESSAGE);
+        cryptoManagerGUI.showInformationMessage("Cryptocurrency '" + metadata.getSymbol() + "' registered successfully!\n\n" +
+                "Name: " + metadata.getName() + "\n" +
+                "Default Price: $" + metadata.getDefaultPrice() + "\n" +
+                "Current Price: $" + metadata.getCurrentPrice() + "\n\n" +
+                "Metadata has been built and is ready for system integration.", "Registration Successful");
     }
 
     private void handleExit() {
         // Ask for confirmation
-        int confirm = JOptionPane.showConfirmDialog(null,
-                "Are you sure you want to exit Crypto Portfolio Manager?",
-                "Confirm Exit",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE);
-
+        int confirm = cryptoManagerGUI.showConfirmationDialog("Are you sure you want to exit Crypto Portfolio Manager?",
+                "Confirm Exit");
         if (confirm == JOptionPane.YES_OPTION) {
             System.out.println("Exiting Crypto Portfolio Manager...");
 
@@ -163,10 +156,7 @@ public class CryptoManager {
                 loggedIn = true;
                 runPortfolioManager();
             } catch (DialogException e) {
-                JOptionPane.showMessageDialog(null,
-                        e.getDialogMessage(),
-                        e.getDialogTitle(),
-                        JOptionPane.ERROR_MESSAGE);
+                cryptoManagerGUI.showErrorMessage(e.getDialogMessage(), e.getDialogTitle());
             }
         }
     }
@@ -190,10 +180,7 @@ public class CryptoManager {
                 accountCreated = authManager.createAccount(request);
                 System.out.println("Account created successfully!");
             } catch (DialogException e) {
-                JOptionPane.showMessageDialog(null,
-                        e.getDialogMessage(),
-                        e.getDialogTitle(),
-                        JOptionPane.ERROR_MESSAGE);
+                cryptoManagerGUI.showErrorMessage(e.getDialogMessage(), e.getDialogTitle());
             }
         }
     }
@@ -289,24 +276,16 @@ public class CryptoManager {
             try {
                 amount = Double.parseDouble(cryptoManagerGUI.showBuyCryptoGUI(symbol, currentPrice, currentUser.getBalance()));
             } catch (DialogException e) {
-                JOptionPane.showMessageDialog(null,
-                        e.getMessage(),
-                        e.getDialogTitle(),
-                        JOptionPane.INFORMATION_MESSAGE);
+                cryptoManagerGUI.showInformationMessage(e.getDialogMessage(), e.getDialogTitle());
                 return;
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(null,
-                        "Please enter a valid amount", "Buy Crypto Failed",
-                        JOptionPane.ERROR_MESSAGE);
+                cryptoManagerGUI.showErrorMessage("Please enter a valid amount", "Buy Crypto Failed");
             } catch (NullPointerException e) {
                 System.out.println("Buy Crypto Cancelled");
                 return;
             }
             if (amount <= 0) {
-                JOptionPane.showMessageDialog(null,
-                        "Amount must be greater then 0", "Buy Crypto Failed",
-                        JOptionPane.ERROR_MESSAGE);
-
+                cryptoManagerGUI.showErrorMessage("Amount must be greater then 0", "Buy Crypto Failed");
                 continue;
             }
             System.out.println("\n--- Buy Crypto ---");
@@ -315,9 +294,7 @@ public class CryptoManager {
 
             // Check if user has enough balance
             if (totalCost > currentUser.getBalance()) {
-                JOptionPane.showMessageDialog(null,
-                        String.format("Insufficient funds. You need $%,.2f but only have $%,.2f\n"), "Buy Crypto Failed",
-                        JOptionPane.ERROR_MESSAGE);
+                cryptoManagerGUI.showErrorMessage(String.format("Insufficient funds. You need $%,.2f but only have $%,.2f\n"), "Buy Crypto Failed");
                 continue;
             }
 
@@ -441,11 +418,8 @@ public class CryptoManager {
             System.out.printf("Old balance: $%.2f\n", oldBalance);
             System.out.printf("New balance: $%.2f\n", newBalance);
             userRepository.saveUserData(currentUser, null);
-
-            JOptionPane.showMessageDialog(null,
-                    String.format("Deposited $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
-                    "Deposit Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
+            cryptoManagerGUI.showErrorMessage(String.format("Deposited $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
+                    "Deposit Successful");
         }
     }
 
@@ -462,11 +436,8 @@ public class CryptoManager {
             System.out.printf("Old balance: $%.2f\n", oldBalance);
             System.out.printf("New balance: $%.2f\n", newBalance);
             userRepository.saveUserData(currentUser, null);
-
-            JOptionPane.showMessageDialog(null,
-                    String.format("Withdrew $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
-                    "Withdrawal Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
+            cryptoManagerGUI.showInformationMessage(String.format("Withdrew $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
+                    "Withdrawal Successful");
         }
     }
     public UserRepository getUserRepository(){

@@ -4,26 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="functionality complete, move on to exception handling">
-      <change afterPath="$PROJECT_DIR$/data/users/prince.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/AccountRegistrationException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/DialogException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/InvalidInputException.java" afterDir="false" />
+    <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="exception handling done!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/assetmetadata.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/assetmetadata.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/auth.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/auth.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/users/john.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/users/john.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Asset.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Asset.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AssetFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AssetFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AssetMetadata.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AssetMetadata.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AssetMetadataBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AssetMetadataBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AssetRegistry.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AssetRegistry.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AuthManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AuthManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CreateAccountRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CreateAccountRequest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CryptoManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CryptoManagerGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManagerGUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/LoginAttempt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/LoginAttempt.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/UserRepository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -197,7 +181,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765096182764</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="exception handling done!">
+      <option name="closed" value="true" />
+      <created>1765158046408</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1765158046408</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -227,6 +219,7 @@
     <MESSAGE value="more oop" />
     <MESSAGE value="even more oop" />
     <MESSAGE value="added builder feature" />
-    <option name="LAST_COMMIT_MESSAGE" value="added builder feature" />
+    <MESSAGE value="exception handling done!" />
+    <option name="LAST_COMMIT_MESSAGE" value="exception handling done!" />
   </component>
 </project>
