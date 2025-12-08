@@ -1,6 +1,6 @@
 import javax.swing.*;
 
-public class CreateAccountRequest {
+public class CreateAccountRequest implements Request{
     private String username;
     private String password;
     private String confirmPassword;
@@ -23,7 +23,7 @@ public class CreateAccountRequest {
         return confirmPassword;
     }
 
-    public void isValid() throws AccountRegistrationException, InvalidInputException {
+    public void validate() throws AccountRegistrationException, InvalidInputException {
         // Check for null/empty fields
         if (username == null || username.trim().isEmpty()) {
             throw InvalidInputException.emptyField("Username", "Account Creation Failed");

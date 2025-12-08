@@ -13,7 +13,7 @@ public class AuthManager {
     }
 
     public User login(LoginAttempt loginAttempt) throws DialogException{
-        loginAttempt.isValid();
+        loginAttempt.validate();
         String username = loginAttempt.getUsername();
         String password = loginAttempt.getPassword();
         // Validate credentials
@@ -29,7 +29,7 @@ public class AuthManager {
         return null;
     }
     public void createAccount(CreateAccountRequest request) throws Exception{
-        request.isValid();
+        request.validate();
         String username = request.getUsername();
         String password = request.getPassword();
         String confirmPassword = request.getConfirmPassword();

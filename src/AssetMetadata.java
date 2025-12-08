@@ -56,12 +56,6 @@ public class AssetMetadata {
         }
         return priceHistory.get(priceHistory.size() - 1);
     }
-
-    // Get price history size
-    public int getPriceHistorySize() {
-        return priceHistory.size();
-    }
-
     // Getter for current price (latest from history)
     public double getCurrentPrice() {
         return priceHistory.isEmpty() ? currentPrice : getLatestPrice();

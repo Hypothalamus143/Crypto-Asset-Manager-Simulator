@@ -5,16 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6c4636cf-a909-4c6f-868b-6eabb1355f22" name="Changes" comment="exception handling done!">
-      <change afterPath="$PROJECT_DIR$/data/users/john1.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/users/john2.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Request.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/auth.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/auth.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AccountRegistrationException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AccountRegistrationException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AssetMetadata.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AssetMetadata.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AuthManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AuthManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CreateAccountRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CreateAccountRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CryptoManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CryptoManagerGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CryptoManagerGUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/LoginAttempt.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/LoginAttempt.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,7 +25,7 @@
     </option>
   </component>
   <component name="Git.Merge.Settings">
-    <option name="BRANCH" value="gui" />
+    <option name="BRANCH" value="main" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -63,7 +59,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "oop",
     "kotlin-language-version-configured": "true",
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.0",

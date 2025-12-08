@@ -1,4 +1,4 @@
-public class LoginAttempt {
+public class LoginAttempt implements Request{
     private String username;
     private String password;
 
@@ -15,11 +15,10 @@ public class LoginAttempt {
         return password;
     }
 
-    public boolean isValid() throws InvalidInputException{
+    public void validate() throws InvalidInputException{
         if(username == null || username.trim().isEmpty())
             throw InvalidInputException.emptyField("Username", "Login Failed");
         else if(password == null || password.trim().isEmpty())
             throw InvalidInputException.emptyField("Password", "Login Failed");
-        return true;
     }
 }
