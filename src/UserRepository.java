@@ -17,11 +17,11 @@ public class UserRepository {
     }
 
     public void saveUserData(User user, String password) throws Exception{
-        if(password == null)
-            throw new Exception("Password is null");
-        if(password.trim().isEmpty())
-            throw new Exception("Password is Empty");
-        saveUserToAuthFile(user.getUsername(), password);
+        if(password != null) {
+            if (password.trim().isEmpty())
+                throw new Exception("Password is Empty");
+            saveUserToAuthFile(user.getUsername(), password);
+        }
 
         saveUserToFile(user);
     }

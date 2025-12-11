@@ -436,7 +436,7 @@ public class CryptoManager {
             } catch (Exception e) {
                 cryptoManagerGUI.showErrorMessage(e.getMessage(), "Deposit Failed");
             }
-            cryptoManagerGUI.showErrorMessage(String.format("Deposited $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
+            cryptoManagerGUI.showInformationMessage(String.format("Deposited $%,.2f successfully!\nNew balance: $%,.2f", amount, newBalance),
                     "Deposit Successful");
         }
     }
