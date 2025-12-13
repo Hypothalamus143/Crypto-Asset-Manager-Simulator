@@ -190,29 +190,31 @@ The Swing-based GUI provides:
 ## 🏛️ Design Patterns Used
 
 ### Singleton Pattern
-Multiple manager classes ensure single instances:
-- `AssetRegistry`, `AssetFactory`, `MarketManager`
-- `AuthManager`, `UserRepository`, `CryptoManager`
-- `CryptoManagerGUI`
+Used for: `AssetRegistry`, `AssetFactory`, `MarketManager`, `AuthManager`, `UserRepository`, `CryptoManager`, `CryptoManagerGUI`
+
+### Flyweight Pattern
+**Implementation:** `AssetMetadata` objects (intrinsic state) shared across all `Asset` instances via `AssetRegistry`
+**Benefit:** Memory efficiency and consistency - only one metadata instance per cryptocurrency type
+
+### Composition Pattern
+**Implementation:** `Asset` **has-a** `AssetMetadata` (strong "whole-part" relationship)
+**Benefit:** Encapsulation and delegation of metadata responsibilities
 
 ### Builder Pattern
-- `AssetMetadataBuilder` for constructing complex asset metadata objects
+Used for: `AssetMetadataBuilder` constructs complex asset metadata objects
 
 ### Factory Pattern
-- `AssetFactory` encapsulates asset creation logic
-- Centralized asset instantiation
+Used for: `AssetFactory` creates `Asset` instances using shared metadata
 
 ### Strategy Pattern
-- Multiple `Comparator` implementations for different sorting algorithms
-- `Sorter` class manages sorting strategies
+Used for: Multiple `Comparator` implementations for different sorting algorithms
 
 ### DAO Pattern
-- `UserRepository` separates data persistence logic
-- Encapsulates file operations for user data
+Used for: `UserRepository` separates data persistence logic
 
 ### Template Method Pattern
-- Validation logic in `Validatable` implementations
-
+->
+Used for: Validation logic in `Validatable` implementations
 ---
 
 ---
