@@ -3,7 +3,6 @@ import java.util.Scanner;
 public class AuthManager {
     private static User currentUser;
     private static AuthManager instance;
-    private CryptoManagerGUI cryptoManagerGUI;
     private UserRepository userRepository = UserRepository.getInstance();
     private Scanner scanner = new Scanner(System.in);
 
