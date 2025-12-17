@@ -37,9 +37,7 @@ This repository contains:
 ## 📘 OOP Implementation
 
 ### Abstraction
-- `Validatable` interface for validation logic
-- Abstract exception hierarchy with `DialogException`
-- Abstract concepts separated from concrete implementations
+- `Validatable` interface for validation logic where Validatable interface classes are required to validate and throw a DialogException for the GUI Error Handling
 
 ### Encapsulation
 - Private fields with controlled access through getters/setters
@@ -52,7 +50,9 @@ This repository contains:
 - Comparator implementations extending base comparator logic
 
 ### Polymorphism
-- Multiple `Comparator` implementations for different sorting strategies
+- AssetMetadata subclasses (BitcoinMetadata, EthereumMetadata, SolanaMetadata) are treated as AssetMetadata in the AssetRegistry
+- Multiple `Comparator` inner classes for different sorting strategies are treated simply as Comparator
+- Subclasses of `DialogException` are caught simply as DialogException
 - Runtime method resolution in asset value calculations
 - Interface-based validation through `Validatable`
 
@@ -74,9 +74,13 @@ The system architecture is built around a comprehensive class structure:
 - **CryptoManager**: Main application controller
 - **CryptoManagerGUI**: Graphical user interface controller
 
-### Builder & Factory Patterns
+### Builder Patterns
 - **AssetMetadataBuilder**: Builder pattern for constructing asset metadata
+
+
+### Factory Patterns
 - **AssetFactory**: Factory pattern for creating Asset objects
+  **InvalidInputException**: Factory pattern for custom InvalidInputException
 
 ### Comparator Classes
 - **SymbolComparator**, **TotalValueComparator**, **ProfitAmountComparator**, etc.
@@ -160,7 +164,6 @@ The system implements persistent data storage through:
 ### File Operations
 - Save/load user data on login/logout
 - Automatic backup of user information
-- Error recovery for corrupted files
 
 ---
 
@@ -176,14 +179,12 @@ The Swing-based GUI provides:
 ### User Experience Features
 - Clean, organized layout using CardLayout
 - Real-time balance and portfolio updates
-- Form validation with instant feedback
 - Confirmation dialogs for critical operations
 - Sorting controls for portfolio organization
 
 ### Visual Feedback
 - Success/error message dialogs
-- Progress indicators for market updates
-- Color-coded profit/loss displays
+- Graph for price history
 
 ---
 
@@ -196,8 +197,8 @@ Used for: `AssetRegistry`, `AssetFactory`, `MarketManager`, `AuthManager`, `User
 **Implementation:** `AssetMetadata` objects (intrinsic state) shared across all `Asset` instances via `AssetRegistry`
 **Benefit:** Memory efficiency and consistency - only one metadata instance per cryptocurrency type
 
-### Composition Pattern
-**Implementation:** `Asset` **has-a** `AssetMetadata` (strong "whole-part" relationship)
+### Bridge Pattern
+**Implementation:** Separates `Asset` from `AssetMetadata`
 **Benefit:** Encapsulation and delegation of metadata responsibilities
 
 ### Builder Pattern

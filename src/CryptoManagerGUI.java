@@ -240,14 +240,14 @@ public LoginAttempt showLoginGUI() throws Exception {
         return showCreateAccountGUI(null);
     }
 
-    public CreateAccountRequest showCreateAccountGUI(CreateAccountRequest defaultValues) throws Exception{
-        JDialog createAccDialog = new JDialog((JFrame)null, "Create Account", true);
-        createAccDialog.setSize(400, 200); // Slightly taller for error messages
+    public CreateAccountRequest showCreateAccountGUI(CreateAccountRequest defaultValues) throws Exception {
+        JDialog createAccDialog = new JDialog((JFrame) null, "Create Account", true);
+        createAccDialog.setSize(500, 450); // Increased size for requirements
         createAccDialog.setLocationRelativeTo(null);
         createAccDialog.setResizable(false);
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         // Create form panel with GridBagLayout
         JPanel formPanel = new JPanel(new GridBagLayout());
@@ -255,19 +255,19 @@ public LoginAttempt showLoginGUI() throws Exception {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Fixed width labels
+        // Labels with fixed width
         JLabel userLabel = new JLabel("Username:");
         JLabel passLabel = new JLabel("Password:");
         JLabel confirmLabel = new JLabel("Confirm Password:");
 
-        Dimension labelSize = new Dimension(120, 25);
+        Dimension labelSize = new Dimension(140, 25);
         userLabel.setPreferredSize(labelSize);
         passLabel.setPreferredSize(labelSize);
         confirmLabel.setPreferredSize(labelSize);
 
-        JTextField userField = new JTextField(15);
-        JPasswordField passField = new JPasswordField(15);
-        JPasswordField confirmPassField = new JPasswordField(15);
+        JTextField userField = new JTextField(20);
+        JPasswordField passField = new JPasswordField(20);
+        JPasswordField confirmPassField = new JPasswordField(20);
 
         // Set default values if provided
         if (defaultValues != null) {
@@ -292,9 +292,45 @@ public LoginAttempt showLoginGUI() throws Exception {
         gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(userField, gbc);
 
-        // Row 1: Password
-        gbc.gridx = 0;
+        // Row 1: Username Requirements
+        gbc.gridx = 1;
         gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(2, 5, 15, 5);
+
+        JPanel usernameRequirementsPanel = new JPanel(new GridLayout(4, 1, 0, 2));
+        usernameRequirementsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        usernameRequirementsPanel.setBackground(Color.WHITE);
+
+        JLabel usernameReq1 = new JLabel("• Must be 3-20 characters");
+        JLabel usernameReq2 = new JLabel("• Letters, numbers, and underscores only");
+        JLabel usernameReq3 = new JLabel("• No spaces or special characters");
+        JLabel usernameReq4 = new JLabel("• Cannot be a reserved name");
+
+        usernameReq1.setFont(new Font("Arial", Font.PLAIN, 11));
+        usernameReq2.setFont(new Font("Arial", Font.PLAIN, 11));
+        usernameReq3.setFont(new Font("Arial", Font.PLAIN, 11));
+        usernameReq4.setFont(new Font("Arial", Font.PLAIN, 11));
+
+        usernameReq1.setForeground(Color.GRAY);
+        usernameReq2.setForeground(Color.GRAY);
+        usernameReq3.setForeground(Color.GRAY);
+        usernameReq4.setForeground(Color.GRAY);
+
+        usernameRequirementsPanel.add(usernameReq1);
+        usernameRequirementsPanel.add(usernameReq2);
+        usernameRequirementsPanel.add(usernameReq3);
+        usernameRequirementsPanel.add(usernameReq4);
+
+        formPanel.add(usernameRequirementsPanel, gbc);
+
+        // Reset insets
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Row 2: Password
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
         gbc.weightx = 0.0;
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(passLabel, gbc);
@@ -304,9 +340,62 @@ public LoginAttempt showLoginGUI() throws Exception {
         gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(passField, gbc);
 
-        // Row 2: Confirm Password
+        // Row 3: Password Requirements
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(2, 5, 15, 5);
+
+        JPanel passwordRequirementsPanel = new JPanel(new GridLayout(8, 1, 0, 2));
+        passwordRequirementsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        passwordRequirementsPanel.setBackground(Color.WHITE);
+
+        JLabel passReq1 = new JLabel("• Must be 8-50 characters");
+        JLabel passReq2 = new JLabel("• At least one uppercase letter (A-Z)");
+        JLabel passReq3 = new JLabel("• At least one lowercase letter (a-z)");
+        JLabel passReq4 = new JLabel("• At least one number (0-9)");
+        JLabel passReq5 = new JLabel("• At least one special character (!@#$% etc.)");
+        JLabel passReq6 = new JLabel("• Cannot contain your username");
+        JLabel passReq7 = new JLabel("• Avoid sequential characters (123, abc)");
+        JLabel passReq8 = new JLabel("• Avoid repeated characters (aaaa, 1111)");
+
+        Font reqFont = new Font("Arial", Font.PLAIN, 11);
+        passReq1.setFont(reqFont);
+        passReq2.setFont(reqFont);
+        passReq3.setFont(reqFont);
+        passReq4.setFont(reqFont);
+        passReq5.setFont(reqFont);
+        passReq6.setFont(reqFont);
+        passReq7.setFont(reqFont);
+        passReq8.setFont(reqFont);
+
+        passReq1.setForeground(Color.GRAY);
+        passReq2.setForeground(Color.GRAY);
+        passReq3.setForeground(Color.GRAY);
+        passReq4.setForeground(Color.GRAY);
+        passReq5.setForeground(Color.GRAY);
+        passReq6.setForeground(Color.GRAY);
+        passReq7.setForeground(Color.GRAY);
+        passReq8.setForeground(Color.GRAY);
+
+        passwordRequirementsPanel.add(passReq1);
+        passwordRequirementsPanel.add(passReq2);
+        passwordRequirementsPanel.add(passReq3);
+        passwordRequirementsPanel.add(passReq4);
+        passwordRequirementsPanel.add(passReq5);
+        passwordRequirementsPanel.add(passReq6);
+        passwordRequirementsPanel.add(passReq7);
+        passwordRequirementsPanel.add(passReq8);
+
+        formPanel.add(passwordRequirementsPanel, gbc);
+
+        // Reset insets
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Row 4: Confirm Password
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 4;
+        gbc.gridwidth = 1;
         gbc.weightx = 0.0;
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(confirmLabel, gbc);
@@ -316,26 +405,13 @@ public LoginAttempt showLoginGUI() throws Exception {
         gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(confirmPassField, gbc);
 
-        // Row 3: Password match indicator
+        // Row 5: Add some vertical space before buttons
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 5;
         gbc.gridwidth = 2;
-        gbc.weightx = 1.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(10, 5, 5, 5);
-
-        JLabel passwordMatchLabel = new JLabel("", JLabel.CENTER);
-        passwordMatchLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-        passwordMatchLabel.setForeground(Color.GRAY);
-        passwordMatchLabel.setPreferredSize(new Dimension(0, 20));
-        formPanel.add(passwordMatchLabel, gbc);
-
-        // Add filler to push everything up
-        gbc.gridy = 4;
         gbc.weighty = 1.0;
-        gbc.fill = GridBagConstraints.BOTH;
-        formPanel.add(Box.createVerticalGlue(), gbc);
+        gbc.fill = GridBagConstraints.VERTICAL;
+        formPanel.add(Box.createVerticalStrut(20), gbc);
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
@@ -375,7 +451,7 @@ public LoginAttempt showLoginGUI() throws Exception {
         createAccDialog.pack();
         createAccDialog.setVisible(true);
 
-        if(result[0] == null)
+        if (result[0] == null)
             throw new Exception("Create Account Request is null");
         return result[0];
     }
@@ -385,106 +461,278 @@ public LoginAttempt showLoginGUI() throws Exception {
         return chartContainer;
     }
 
-    private JPanel createSimpleChart(List<Double> prices, String symbol){
-        // Create a chart panel that's wider than the viewport
+    private JPanel createSimpleChart(List<Double> prices, String symbol) {
+        // Fixed height, dynamic width based on data points
+        int fixedHeight = 300; // Fixed chart height
+        int minWidthPerPoint = 30; // Minimum pixels between data points
+        int chartWidth = Math.max(600, prices.size() * minWidthPerPoint); // Dynamic width
+
+        JPanel chartContainer = new JPanel(new BorderLayout());
+
         JPanel chartPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                // Pass this panel's dimensions to drawPriceChart
-                drawPriceChart(g, prices, symbol, getWidth(), getHeight());
+                // Use the panel's actual width but FIXED height for drawing
+                drawPriceChart(g, prices, symbol, getWidth(), fixedHeight);
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(chartWidth, fixedHeight); // Fixed height, dynamic width
+            }
+
+            @Override
+            public Dimension getMinimumSize() {
+                return new Dimension(400, fixedHeight); // Minimum width
             }
         };
 
-        return chartPanel;
+        chartPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.GRAY, 1),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+
+        JScrollPane scrollPane = new JScrollPane(chartPanel);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setPreferredSize(new Dimension(600, fixedHeight + 20)); // Viewport shows portion
+
+        chartContainer.add(scrollPane, BorderLayout.CENTER);
+
+        return chartContainer;
     }
 
-    private void drawPriceChart(Graphics g, List<Double> prices, String symbol, int width, int height){
+    private void drawPriceChart(Graphics g, List<Double> prices, String symbol, int width, int height) {
+        // Use the provided height (which is FIXED, not the panel's actual height)
+        int chartHeight = height; // This is our fixed chart height
 
-        int padding = 30; // Increased padding for better labels
-
-        // Find min and max prices for scaling
-        double minPrice = Collections.min(prices);
-        double maxPrice = Collections.max(prices);
-        double priceRange = maxPrice - minPrice;
-
-        // Set background
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, width, height);
-
-        // Draw grid lines and labels
-        g.setColor(Color.LIGHT_GRAY);
-        for (int i = 0; i <= 4; i++) {
-            int y = padding + (int)((height - 2 * padding) * (1 - (double)i / 4));
-            g.drawLine(padding, y, width - padding, y);
-
-            // Price labels on left
-            double price = minPrice + (priceRange * i / 4);
-            g.setColor(Color.BLACK);
-            g.drawString(String.format("$%,.0f", price), 5, y + 4);
-            g.setColor(Color.LIGHT_GRAY);
+        // Handle empty or single price point
+        if (prices == null || prices.isEmpty()) {
+            drawNoDataMessage(g, width, chartHeight, symbol);
+            return;
         }
 
-        // Draw time markers on bottom (if we have enough data)
-        if (prices.size() > 10) {
-            g.setColor(Color.GRAY);
-            int timeMarkers = Math.min(10, prices.size() - 1);
-            for (int i = 0; i <= timeMarkers; i++) {
-                int x = padding + (int)((width - 2 * padding) * ((double)i / timeMarkers));
-                g.drawLine(x, height - padding, x, height - padding + 5);
+        if (prices.size() == 1) {
+            drawSinglePriceMessage(g, width, chartHeight, prices.get(0), symbol);
+            return;
+        }
 
-                // Label every other marker to avoid clutter
-                if (i % 2 == 0) {
-                    g.setColor(Color.BLACK);
-                    g.drawString("T-" + (timeMarkers - i), x - 10, height - padding + 20);
-                    g.setColor(Color.GRAY);
-                }
+        int padding = 35;
+
+        // Find min and max prices for scaling with some margin
+        double minPrice = Collections.min(prices);
+        double maxPrice = Collections.max(prices);
+        double margin = (maxPrice - minPrice) * 0.1;
+        double adjustedMin = minPrice - margin;
+        double adjustedMax = maxPrice + margin;
+        double priceRange = adjustedMax - adjustedMin;
+
+        // Calculate the ACTUAL chart area width (based on preferred size, not viewport)
+        int actualChartWidth = Math.max(width, prices.size() * 30); // At least 30px per point
+
+        // Set background for entire panel
+        g.setColor(new Color(245, 245, 250));
+        g.fillRect(0, 0, actualChartWidth, chartHeight);
+
+        // Draw title at the beginning of the chart (left side)
+        g.setColor(Color.DARK_GRAY);
+        g.setFont(new Font("Arial", Font.BOLD, 16));
+        String title = symbol + " (" + prices.size() + " periods)";
+        g.drawString(title, padding, 20);
+
+        // Draw grid lines and labels (vertical lines spaced evenly)
+        g.setFont(new Font("Arial", Font.PLAIN, 10));
+        int gridLines = 5;
+        for (int i = 0; i <= gridLines; i++) {
+            int y = padding + (int)((chartHeight - 2 * padding) * (1 - (double)i / gridLines));
+
+            // Horizontal grid line across entire chart
+            g.setColor(new Color(220, 220, 220));
+            g.drawLine(padding, y, actualChartWidth - padding, y);
+
+            // Price labels on left
+            double price = adjustedMin + (priceRange * i / gridLines);
+            g.setColor(Color.DARK_GRAY);
+            String priceLabel = String.format("$%,.0f", price);
+            g.drawString(priceLabel, 5, y + 4);
+        }
+
+        // Draw time markers on bottom - FIXED to use actualChartWidth
+        // Calculate pixel spacing between points
+        int pixelSpacing = Math.max(1, (actualChartWidth - 2 * padding) / Math.max(1, prices.size() - 1));
+
+        // Determine how many time markers to show (one every 100 pixels)
+        int timeMarkerInterval = Math.max(1, 100 / pixelSpacing);
+        int timeMarkerCount = Math.max(2, prices.size() / timeMarkerInterval);
+
+        g.setColor(Color.GRAY);
+        for (int i = 0; i <= timeMarkerCount; i++) {
+            int dataIndex = (i * prices.size()) / timeMarkerCount;
+            int x = padding + (dataIndex * pixelSpacing);
+
+            // Don't draw if beyond chart area
+            if (x > actualChartWidth - padding) break;
+
+            // Vertical grid line
+            g.setColor(new Color(230, 230, 230));
+            g.drawLine(x, padding, x, chartHeight - padding);
+
+            // Time marker
+            g.setColor(Color.GRAY);
+            g.drawLine(x, chartHeight - padding, x, chartHeight - padding + 5);
+
+            // Time labels - show first, middle, and last
+            if (i == 0 || i == timeMarkerCount || i == timeMarkerCount / 2) {
+                g.setColor(Color.DARK_GRAY);
+                String timeLabel;
+                if (i == 0) timeLabel = "Start";
+                else if (i == timeMarkerCount) timeLabel = "Now";
+                else timeLabel = "Mid";
+
+                g.drawString(timeLabel, x - 8, chartHeight - padding + 18);
             }
         }
 
-        // Draw price line with anti-aliasing for smoother lines
+        // Draw price line
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setColor(Color.BLUE);
-        g2d.setStroke(new BasicStroke(2.0f)); // Thicker line
 
-        for (int i = 1; i < prices.size(); i++) {
-            int x1 = padding + (int)((width - 2 * padding) * ((double)(i - 1) / (prices.size() - 1)));
-            int y1 = padding + (int)((height - 2 * padding) * (1 - (prices.get(i - 1) - minPrice) / priceRange));
+        // Draw line connecting points
+        g2d.setColor(new Color(25, 121, 202));
+        g2d.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
-            int x2 = padding + (int)((width - 2 * padding) * ((double)i / (prices.size() - 1)));
-            int y2 = padding + (int)((height - 2 * padding) * (1 - (prices.get(i) - minPrice) / priceRange));
+        // Also draw area under curve for better visualization
+        Polygon areaPolygon = new Polygon();
+        for (int i = 0; i < prices.size(); i++) {
+            int x = padding + (i * pixelSpacing);
+            int y = padding + (int)((chartHeight - 2 * padding) * (1 - (prices.get(i) - adjustedMin) / priceRange));
+
+            areaPolygon.addPoint(x, y);
+
+            // Draw point at important positions
+            if (i == 0 || i == prices.size() - 1 || i % 50 == 0) {
+                g2d.setColor(Color.RED);
+                g2d.fillOval(x - 2, y - 2, 4, 4);
+                g2d.setColor(new Color(25, 121, 202));
+            }
+        }
+
+        // Close the polygon for area fill
+        areaPolygon.addPoint(padding + ((prices.size() - 1) * pixelSpacing), chartHeight - padding);
+        areaPolygon.addPoint(padding, chartHeight - padding);
+
+        // Fill area under curve with gradient
+        GradientPaint gradient = new GradientPaint(0, padding, new Color(25, 121, 202, 80),
+                0, chartHeight - padding, new Color(25, 121, 202, 20));
+        g2d.setPaint(gradient);
+        g2d.fill(areaPolygon);
+
+        // Draw the line on top
+        g2d.setColor(new Color(25, 121, 202));
+        for (int i = 0; i < prices.size() - 1; i++) {
+            int x1 = padding + (i * pixelSpacing);
+            int y1 = padding + (int)((chartHeight - 2 * padding) * (1 - (prices.get(i) - adjustedMin) / priceRange));
+
+            int x2 = padding + ((i + 1) * pixelSpacing);
+            int y2 = padding + (int)((chartHeight - 2 * padding) * (1 - (prices.get(i + 1) - adjustedMin) / priceRange));
 
             g2d.drawLine(x1, y1, x2, y2);
-
-            g2d.setColor(Color.RED);
-            g2d.fillOval(x2 - 3, y2 - 3, 6, 6);
-            g2d.setColor(Color.BLUE);
         }
 
-        // Draw current price info
-        double currentPrice = prices.get(prices.size() - 1);
-        g.setColor(Color.BLACK);
-        g.setFont(new Font("Arial", Font.BOLD, 14));
-        g.drawString("Current Price: $" + String.format("%,.2f", currentPrice),
-                width - 200, padding + 15);
+        // Draw current price marker at the end
+        int lastX = padding + ((prices.size() - 1) * pixelSpacing);
+        int lastY = padding + (int)((chartHeight - 2 * padding) * (1 - (prices.get(prices.size() - 1) - adjustedMin) / priceRange));
 
-        // Draw min/max labels
-        g.setFont(new Font("Arial", Font.PLAIN, 10));
-        g.drawString("High: $" + String.format("%,.0f", maxPrice), width - 200, padding + 35);
-        g.drawString("Low: $" + String.format("%,.0f", minPrice), width - 200, padding + 50);
+        g2d.setColor(Color.RED);
+        g2d.fillOval(lastX - 4, lastY - 4, 8, 8);
+        g2d.setColor(Color.WHITE);
+        g2d.drawOval(lastX - 4, lastY - 4, 8, 8);
 
-        // Draw price change if we have enough data
-        if (prices.size() > 1) {
-            double firstPrice = prices.get(0);
-            double priceChange = ((currentPrice - firstPrice) / firstPrice) * 100;
-            Color changeColor = priceChange >= 0 ? Color.GREEN : Color.RED;
-            g.setColor(changeColor);
+        // Draw info panel at the END of the chart (right side)
+        int infoPanelX = actualChartWidth - 180;
+        if (infoPanelX > padding) { // Only draw if there's space
+            // Draw semi-transparent white background
+            g.setColor(new Color(255, 255, 255, 220));
+            g.fillRect(infoPanelX, padding, 170, 110);
+            g.setColor(Color.DARK_GRAY);
+            g.drawRect(infoPanelX, padding, 170, 110);
+
+            // Current price
+            double currentPrice = prices.get(prices.size() - 1);
             g.setFont(new Font("Arial", Font.BOLD, 12));
-            g.drawString(String.format("%+.2f%%", priceChange), width - 200, padding + 70);
+            g.setColor(Color.BLACK);
+            g.drawString("Current: $" + String.format("%,.2f", currentPrice),
+                    infoPanelX + 10, padding + 20);
+
+            // High/Low
+            g.setFont(new Font("Arial", Font.PLAIN, 11));
+            g.drawString("High: $" + String.format("%,.2f", maxPrice), infoPanelX + 10, padding + 40);
+            g.drawString("Low: $" + String.format("%,.2f", minPrice), infoPanelX + 10, padding + 60);
+
+            // Calculate recent trend (last 5 periods)
+            if (prices.size() > 5) {
+                double recentPrice = currentPrice;
+                double previousPrice = prices.get(Math.max(0, prices.size() - 6));
+
+                double percentChange = ((recentPrice - previousPrice) / previousPrice) * 100;
+
+                Color changeColor = percentChange >= 0 ? new Color(0, 150, 0) : Color.RED;
+                g.setColor(changeColor);
+                g.setFont(new Font("Arial", Font.BOLD, 12));
+
+                String changeText = String.format("%+.2f%%", percentChange);
+                g.drawString(changeText, infoPanelX + 10, padding + 85);
+
+                // Trend indicator
+                String trend = percentChange >= 0 ? "↗ Bullish" : "↘ Bearish";
+                g.drawString(trend, infoPanelX + 10, padding + 105);
+            }
         }
+
+        // Draw border around entire chart area
+        g.setColor(Color.GRAY);
+        g.drawRect(padding, padding, actualChartWidth - 2 * padding, chartHeight - 2 * padding);
     }
 
+    // Keep the helper methods the same
+    private void drawNoDataMessage(Graphics g, int width, int height, String symbol) {
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, width, height);
+
+        g.setColor(Color.GRAY);
+        g.setFont(new Font("Arial", Font.BOLD, 16));
+        String message = "No price data available for " + symbol;
+        int messageWidth = g.getFontMetrics().stringWidth(message);
+        g.drawString(message, width / 2 - messageWidth / 2, height / 2 - 20);
+
+        g.setFont(new Font("Arial", Font.PLAIN, 12));
+        String instruction = "Data will appear after price updates";
+        int instructionWidth = g.getFontMetrics().stringWidth(instruction);
+        g.drawString(instruction, width / 2 - instructionWidth / 2, height / 2 + 10);
+    }
+
+    private void drawSinglePriceMessage(Graphics g, int width, int height, double price, String symbol) {
+        g.setColor(new Color(245, 245, 250));
+        g.fillRect(0, 0, width, height);
+
+        g.setColor(Color.DARK_GRAY);
+        g.setFont(new Font("Arial", Font.BOLD, 16));
+        String title = symbol + " - Initial Price";
+        int titleWidth = g.getFontMetrics().stringWidth(title);
+        g.drawString(title, width / 2 - titleWidth / 2, 50);
+
+        g.setFont(new Font("Arial", Font.BOLD, 24));
+        String priceText = "$" + String.format("%,.2f", price);
+        int priceWidth = g.getFontMetrics().stringWidth(priceText);
+        g.drawString(priceText, width / 2 - priceWidth / 2, height / 2);
+
+        g.setFont(new Font("Arial", Font.PLAIN, 12));
+        String message = "Waiting for more price data...";
+        int messageWidth = g.getFontMetrics().stringWidth(message);
+        g.drawString(message, width / 2 - messageWidth / 2, height / 2 + 30);
+    }
     private JPanel createMarketPricesPanel() throws Exception{
         JPanel marketPanel = new JPanel(new BorderLayout());
         marketPanel.setBorder(BorderFactory.createTitledBorder("Market Prices"));
@@ -1317,7 +1565,7 @@ public void showPortfolioPanel() throws Exception{
         panel.add(Box.createVerticalStrut(10));
         panel.add(buttonPanel);
 
-        final double[] result = new double[]{-1}; // -1 means cancelled
+        final double[] result = new double[]{0}; // 0 means cancelled
 
         // Update function
         Runnable updateValues = () -> {
